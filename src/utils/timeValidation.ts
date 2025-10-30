@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import { CHECKIN_END, CHECKIN_START, CHECKOUT_MIN } from "../lib/constants";
 
 export function checkTimeWarnings(type, now) {

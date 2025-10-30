@@ -14,7 +14,7 @@ import AttendancePanel from "../components/dashboard/AttendancePanel";
 import PlaceholderTab from "../components/dashboard/PlaceholderTab";
 import MobileNav from "../components/dashboard/MobileNav";
 
-export default function Home(): JSX.Element {
+export default function Home() {
   const [activeTab, setActiveTab] = useState("attendance");
   const [punches, setPunches] = useState([]);
   const [message, setMessage] = useState<string | null>(null);

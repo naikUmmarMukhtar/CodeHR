@@ -1,6 +1,6 @@
 import Swal from "sweetalert2";
 
-export async function confirmAction(message) {
+export async function confirmAction(message: any) {
   const result = await Swal.fire({
     title: "Are you sure?",
     text: message,

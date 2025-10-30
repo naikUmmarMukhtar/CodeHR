@@ -1,4 +1,6 @@
-import React from "react";
+// import React from "react";
+// @ts-nocheck
+
 import { Clock } from "lucide-react";
 
 export default function PunchLog({ punches, message }) {

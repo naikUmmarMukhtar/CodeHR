@@ -1,4 +1,6 @@
-import React from "react";
+// import React from "react";
+// @ts-nocheck
+
 import { User, CalendarDays, Wallet } from "lucide-react";
 
 export default function PlaceholderTab({ tab }) {

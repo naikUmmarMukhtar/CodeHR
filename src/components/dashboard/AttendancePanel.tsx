@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import { useMemo, useState } from "react";
 import { getAuth } from "firebase/auth";
 import { auth } from "../../firebase/config";

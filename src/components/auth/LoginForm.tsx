@@ -14,7 +14,7 @@ export default function LoginForm({
   const isMobile = useIsMobile();
   const { errors, showErrors, validate } = useLoginValidation();
 
-  const onSubmit = (e: React.FormEvent) => {
+  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const fieldErrors = validate(formData);
     if (Object.keys(fieldErrors).length > 0) return;

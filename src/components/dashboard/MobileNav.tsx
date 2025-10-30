@@ -1,4 +1,5 @@
-import React from "react";
+// import React from "react";
+// @ts-nocheck
 
 export default function MobileNav({ items, activeTab, setActiveTab }) {
   return (

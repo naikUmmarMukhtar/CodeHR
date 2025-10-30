@@ -1,0 +1,48 @@
+@import "tailwindcss";
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --color-primary: #ff5a5f;
+  --color-secondary: #00a699;
+  --color-accent: #fc642d;
+
+  --color-bg: #ffffff;
+  --color-bg-alt: #f7f7f7;
+
+  --color-text: #484848;
+  --color-text-muted: #767676;
+
+  --color-border: #ebebeb;
+  --color-hover: #ff7e82;
+}
+.simple-calendar {
+  width: 100%;
+  background: white;
+  border: 1px solid #ddd;
+  font-size: 14px;
+}
+
+.calendar-present {
+  background-color: #c8e6c9 !important;
+  color: #2e7d32 !important;
+}
+
+.calendar-absent {
+  background-color: #ffcdd2 !important;
+  color: #c62828 !important;
+}
+
+.calendar-weekend {
+  background-color: #eeeeee !important;
+  color: #555 !important;
+}
+
+.react-calendar__tile {
+  padding: 6px;
+  text-align: center;
+}

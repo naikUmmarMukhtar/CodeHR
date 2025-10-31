@@ -4,7 +4,6 @@ import { useNavigate } from "react-router";
 import { CalendarDays, Clock, User, Wallet } from "lucide-react";
 import { showErrorToast, showSuccessToast } from "../utils/toastMessage";
 import AttendancePanel from "../components/dashboard/AttendancePanel";
-import PlaceholderTab from "../components/dashboard/PlaceholderTab";
 import MobileNav from "../components/dashboard/MobileNav";
 import ContentWrapper from "../components/shared/ContentWrapper";
 import Header from "../components/shared/Header";
@@ -55,16 +54,12 @@ export default function Home() {
           })}
         </p>
 
-        {activeTab === "attendance" ? (
-          <AttendancePanel
-            punches={punches}
-            setPunches={setPunches}
-            message={message}
-            setMessage={setMessage}
-          />
-        ) : (
-          <PlaceholderTab tab={activeTab} />
-        )}
+        <AttendancePanel
+          punches={punches}
+          setPunches={setPunches}
+          message={message}
+          setMessage={setMessage}
+        />
       </main>
 
       <MobileNav

@@ -39,14 +39,11 @@ export default function AttendanceCalendar() {
       statusByDate[date] = "present";
     }
   });
-
   const getTileClass = ({ date }) => {
     const day = date.getDay();
-    const dateStr = date.toISOString().split("T")[0];
-    console.log(dateStr, "datestr");
+    const dateStr = date.toLocaleDateString("en-CA");
 
     if (day === 0 || day === 6) return "calendar-weekend";
-    console.log(statusByDate, "statusbydate");
 
     if (statusByDate[dateStr] === "present") return "calendar-present";
 

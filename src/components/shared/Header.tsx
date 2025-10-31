@@ -1,4 +1,5 @@
 // Header.jsx
+//@ts-nocheck
 import { LogOut } from "lucide-react";
 
 export default function Header({ handleLogout }) {

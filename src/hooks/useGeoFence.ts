@@ -19,20 +19,20 @@ export function useGeofence(setMessage) {
       }
 
       setIsLoading(true);
-      setMessage(" Fetching current location...");
+      setMessage("Fetching current location...");
 
       navigator.geolocation.getCurrentPosition(
         (pos) => {
           setIsLoading(false);
           const { latitude, longitude, accuracy } = pos.coords;
+          const cappedAccuracy = Math.min(accuracy, 100); // cap to avoid wild values
           const distance = haversineDistance(
             latitude,
             longitude,
             OFFICE_COORDS.lat,
             OFFICE_COORDS.lng
           );
-
-          const effectiveRadius = OFFICE_RADIUS_METERS + accuracy;
+          const effectiveRadius = OFFICE_RADIUS_METERS + cappedAccuracy + 10; // buffer
 
           console.log(
             `User: (${latitude}, ${longitude}) | Distance: ${Math.round(
@@ -41,12 +41,12 @@ export function useGeofence(setMessage) {
           );
 
           if (distance > effectiveRadius) {
-            showErrorToast(" Too far from office to punch.");
-            setMessage(`Outside office: ${Math.round(distance)}m away.`);
+            showErrorToast("Too far from office to punch.");
+            setMessage(`❌ Outside office: ${Math.round(distance)}m away.`);
             setIsInside(false);
             reject("Outside office area");
           } else {
-            setMessage(`Within office (${Math.round(distance)}m away).`);
+            setMessage(`✅ Within office (${Math.round(distance)}m away).`);
             setIsInside(true);
             resolve(true);
           }
@@ -65,27 +65,28 @@ export function useGeofence(setMessage) {
 
   useEffect(() => {
     if (!navigator.geolocation) {
-      setMessage(" Geolocation not supported by this browser.");
+      setMessage("Geolocation not supported by this browser.");
       return;
     }
 
     watchIdRef.current = navigator.geolocation.watchPosition(
       (pos) => {
         const { latitude, longitude, accuracy } = pos.coords;
+        const cappedAccuracy = Math.min(accuracy, 100);
         const distance = haversineDistance(
           latitude,
           longitude,
           OFFICE_COORDS.lat,
           OFFICE_COORDS.lng
         );
-        const effectiveRadius = OFFICE_RADIUS_METERS + accuracy;
+        const effectiveRadius = OFFICE_RADIUS_METERS + cappedAccuracy + 10;
         const inside = distance <= effectiveRadius;
 
         setIsInside(inside);
         setMessage(
           inside
-            ? ` Inside office (${Math.round(distance)}m away)`
-            : ` Outside office (${Math.round(distance)}m away)`
+            ? `✅ Inside office (${Math.round(distance)}m away)`
+            : `❌ Outside office (${Math.round(distance)}m away)`
         );
       },
       (err) => {

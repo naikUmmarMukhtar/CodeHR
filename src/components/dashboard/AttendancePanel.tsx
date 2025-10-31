@@ -6,7 +6,6 @@ import AttendanceCalendar from "./AttendanceCalendar";
 import Announcements from "./Announcements";
 import { useGeofence } from "../../hooks/useGeoFence";
 import { useAttendanceActions } from "../../hooks/useAttendanceActions";
-import { showErrorToast } from "../../utils/toastMessage";
 
 export default function AttendancePanel({
   punches,
@@ -14,10 +13,15 @@ export default function AttendancePanel({
   message,
   setMessage,
 }) {
-  const [geoAllowed, setGeoAllowed] = useState(false);
-
   const { handleCheckIn, handleCheckOut } = useAttendanceActions(setPunches);
   const { verifyLocation, isLoading, isInside } = useGeofence(setMessage);
+
+  const isCheckedIn = useMemo(
+    () => punches.length > 0 && punches[punches.length - 1].type === "Check-in",
+    [punches]
+  );
+
+  const nextActionType = isCheckedIn ? "Check-out" : "Check-in";
 
   const recordPunch = async () => {
     try {
@@ -25,15 +29,9 @@ export default function AttendancePanel({
       if (nextActionType === "Check-in") await handleCheckIn();
       else await handleCheckOut();
     } catch {
-      // showErrorToast("Punch failed: You must be inside the office area.");
+      setMessage("❌ Punch failed: You must be inside the office area.");
     }
   };
-  const isCheckedIn = useMemo(
-    () => punches.length > 0 && punches[punches.length - 1].type === "Check-in",
-    [punches]
-  );
-
-  const nextActionType = isCheckedIn ? "Check-out" : "Check-in";
 
   return (
     <div
@@ -52,6 +50,7 @@ export default function AttendancePanel({
           />
         </div>
       </div>
+
       {message && (
         <p
           className={`text-sm font-medium text-center ${

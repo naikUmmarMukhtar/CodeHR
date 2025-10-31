@@ -4,7 +4,7 @@ export function haversineDistance(
   lat2: number,
   lon2: number
 ) {
-  const R = 6371000;
+  const R = 6371000; // Earth radius in meters
   const toRad = (v: number) => (v * Math.PI) / 180;
   const dLat = toRad(lat2 - lat1);
   const dLon = toRad(lon2 - lon1);

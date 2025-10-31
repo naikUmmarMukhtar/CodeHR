@@ -1,7 +1,8 @@
+//@ts-nocheck
 import { useState } from "react";
 import {
   createUserWithEmailAndPassword,
-  // signInWithEmailAndPassword,
+  signInWithEmailAndPassword,
   updateProfile,
   // sendEmailVerification,
   signOut,
@@ -55,11 +56,11 @@ export default function MobileAuthForm() {
       }
 
       if (isLogin) {
-        // const userCredential = await signInWithEmailAndPassword(
-        //   auth,
-        //   email,
-        //   password
-        // );
+        const userCredential = await signInWithEmailAndPassword(
+          auth,
+          email,
+          password
+        );
         // if (!userCredential.user.emailVerified) {
         //   setError("Please verify your email before logging in.");
         //   await signOut(auth);

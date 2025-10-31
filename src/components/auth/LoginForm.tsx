@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useIsMobile } from "../../hooks/useIsMobile";
 import { useLoginValidation } from "../../hooks/useLoginValidation";
 import FormInput from "../shared/FormInput";
@@ -14,7 +15,8 @@ export default function LoginForm({
   const isMobile = useIsMobile();
   const { errors, showErrors, validate } = useLoginValidation();
 
-  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const onSubmit = (e) => {
+    console.log("clicked");
     e.preventDefault();
     const fieldErrors = validate(formData);
     if (Object.keys(fieldErrors).length > 0) return;

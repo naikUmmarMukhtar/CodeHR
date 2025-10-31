@@ -1,8 +1,14 @@
 // @ts-nocheck
 import { getAuth } from "firebase/auth";
-import { CHECKIN_START } from "../lib/constants";
-import { postToFirebase, putToFirebase } from "../api/firebaseAPI";
+import { CHECKIN_START, CHECKOUT_MIN } from "../lib/constants";
+import {
+  getFromFirebase,
+  postToFirebase,
+  putToFirebase,
+} from "../api/firebaseAPI";
 import { showErrorToast, showSuccessToast } from "../utils/toastMessage";
+import { checkTimeWarnings } from "../utils/timeValidation";
+import { confirmAction } from "../utils/ConfirmDialog";
 
 export function useAttendanceActions(setPunches) {
   const user = getAuth().currentUser;
@@ -18,35 +24,28 @@ export function useAttendanceActions(setPunches) {
     });
 
   const handleCheckIn = async () => {
+    if (!userId) {
+      showErrorToast("User not authenticated.");
+      return;
+    }
+
     const now = new Date();
     const today = getTodayKey();
     const timeOnly = getTimeNow();
 
-    // if (now.getHours() < CHECKIN_START.hour)
-    //   return showErrorToast(
-    //     `Check-in not allowed before ${CHECKIN_START.hour}:${CHECKIN_START.minute} AM.`
-    //   );
+    try {
+      await postToFirebase(`${userId}/attendance/${today}`, {
+        checkIn: timeOnly,
+        checkOut: "",
+        status: "absent",
+      });
 
-    const existing = await getFromFirebase(`${userId}/attendance/${today}`);
-    // if (existing && Object.values(existing).some((v) => v.status))
-    //   return showErrorToast("You’ve already checked in today.");
-
-    // const warnings = checkTimeWarnings("Check-in", now);
-    // const confirmed = await confirmAction(
-    //   warnings.length
-    //     ? `${warnings[0]}\n\nProceed with Check-in?`
-    //     : "Confirm Check-in?"
-    // );
-    // if (!confirmed) return;
-
-    await postToFirebase(`${userId}/attendance/${today}`, {
-      checkIn: timeOnly,
-      checkOut: "",
-      status: "absent",
-    });
-
-    setPunches((prev) => [...prev, { time: timeOnly, type: "Check-in" }]);
-    showSuccessToast("Check-in successful!");
+      setPunches((prev) => [...prev, { time: timeOnly, type: "Check-in" }]);
+      showSuccessToast("Check-in successful!");
+    } catch (err) {
+      console.error("Firebase error:", err);
+      showErrorToast("Failed to post attendance.");
+    }
   };
 
   const handleCheckOut = async () => {

@@ -14,7 +14,7 @@ export default function AttendancePanel({
   setMessage,
 }) {
   const { handleCheckIn, handleCheckOut } = useAttendanceActions(setPunches);
-  const { verifyLocation, isLoading, isInside } = useGeofence(setMessage);
+  const { isLoading, isInside } = useGeofence(setMessage);
 
   const isCheckedIn = useMemo(
     () => punches.length > 0 && punches[punches.length - 1].type === "Check-in",
@@ -24,12 +24,19 @@ export default function AttendancePanel({
   const nextActionType = isCheckedIn ? "Check-out" : "Check-in";
 
   const recordPunch = async () => {
+    if (!isInside) {
+      setMessage("You must be inside the office area.");
+      return;
+    }
+
     try {
-      await verifyLocation();
-      if (nextActionType === "Check-in") await handleCheckIn();
-      else await handleCheckOut();
+      if (nextActionType === "Check-in") {
+        await handleCheckIn();
+      } else {
+        await handleCheckOut();
+      }
     } catch {
-      setMessage("❌ Punch failed: You must be inside the office area.");
+      setMessage("Punch failed. Please try again.");
     }
   };
 

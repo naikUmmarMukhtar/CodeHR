@@ -9,60 +9,6 @@ export function useGeofence(setMessage) {
   const [isInside, setIsInside] = useState(false);
   const watchIdRef = useRef(null);
 
-  const verifyLocation = useCallback(() => {
-    return new Promise((resolve, reject) => {
-      if (!navigator.geolocation) {
-        showErrorToast("Geolocation not supported.");
-        setMessage("Geolocation not supported.");
-        reject("Geolocation not supported.");
-        return;
-      }
-
-      setIsLoading(true);
-      setMessage("Fetching current location...");
-
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          setIsLoading(false);
-          const { latitude, longitude, accuracy } = pos.coords;
-          const cappedAccuracy = Math.min(accuracy, 100); // cap to avoid wild values
-          const distance = haversineDistance(
-            latitude,
-            longitude,
-            OFFICE_COORDS.lat,
-            OFFICE_COORDS.lng
-          );
-          const effectiveRadius = OFFICE_RADIUS_METERS + cappedAccuracy + 10; // buffer
-
-          console.log(
-            `User: (${latitude}, ${longitude}) | Distance: ${Math.round(
-              distance
-            )}m | Accuracy: ±${Math.round(accuracy)}m`
-          );
-
-          if (distance > effectiveRadius) {
-            showErrorToast("Too far from office to punch.");
-            setMessage(`❌ Outside office: ${Math.round(distance)}m away.`);
-            setIsInside(false);
-            reject("Outside office area");
-          } else {
-            setMessage(`✅ Within office (${Math.round(distance)}m away).`);
-            setIsInside(true);
-            resolve(true);
-          }
-        },
-        (err) => {
-          setIsLoading(false);
-          const msg = "Location error: " + err.message;
-          setMessage(msg);
-          showErrorToast("Location access denied or timeout.");
-          reject(err);
-        },
-        { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 }
-      );
-    });
-  }, [setMessage]);
-
   useEffect(() => {
     if (!navigator.geolocation) {
       setMessage("Geolocation not supported by this browser.");
@@ -72,14 +18,14 @@ export function useGeofence(setMessage) {
     watchIdRef.current = navigator.geolocation.watchPosition(
       (pos) => {
         const { latitude, longitude, accuracy } = pos.coords;
-        const cappedAccuracy = Math.min(accuracy, 100);
+        const safeAccuracy = isNaN(accuracy) ? 0 : Math.min(accuracy, 100);
         const distance = haversineDistance(
           latitude,
           longitude,
           OFFICE_COORDS.lat,
           OFFICE_COORDS.lng
         );
-        const effectiveRadius = OFFICE_RADIUS_METERS + cappedAccuracy + 10;
+        const effectiveRadius = OFFICE_RADIUS_METERS + safeAccuracy + 10;
         const inside = distance <= effectiveRadius;
 
         setIsInside(inside);
@@ -101,5 +47,5 @@ export function useGeofence(setMessage) {
     };
   }, [setMessage]);
 
-  return { verifyLocation, isLoading, isInside };
+  return { isLoading, isInside };
 }

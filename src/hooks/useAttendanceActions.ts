@@ -22,22 +22,22 @@ export function useAttendanceActions(setPunches) {
     const today = getTodayKey();
     const timeOnly = getTimeNow();
 
-    if (now.getHours() < CHECKIN_START.hour)
-      return showErrorToast(
-        `Check-in not allowed before ${CHECKIN_START.hour}:${CHECKIN_START.minute} AM.`
-      );
+    // if (now.getHours() < CHECKIN_START.hour)
+    //   return showErrorToast(
+    //     `Check-in not allowed before ${CHECKIN_START.hour}:${CHECKIN_START.minute} AM.`
+    //   );
 
     const existing = await getFromFirebase(`${userId}/attendance/${today}`);
-    if (existing && Object.values(existing).some((v) => v.status))
-      return showErrorToast("You’ve already checked in today.");
+    // if (existing && Object.values(existing).some((v) => v.status))
+    //   return showErrorToast("You’ve already checked in today.");
 
-    const warnings = checkTimeWarnings("Check-in", now);
-    const confirmed = await confirmAction(
-      warnings.length
-        ? `${warnings[0]}\n\nProceed with Check-in?`
-        : "Confirm Check-in?"
-    );
-    if (!confirmed) return;
+    // const warnings = checkTimeWarnings("Check-in", now);
+    // const confirmed = await confirmAction(
+    //   warnings.length
+    //     ? `${warnings[0]}\n\nProceed with Check-in?`
+    //     : "Confirm Check-in?"
+    // );
+    // if (!confirmed) return;
 
     await postToFirebase(`${userId}/attendance/${today}`, {
       checkIn: timeOnly,

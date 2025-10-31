@@ -45,7 +45,7 @@ export default function AttendanceCalendar() {
 
     if (day === 0 || day === 6) return "calendar-weekend";
 
-    if (statusByDate[dateStr] === "present") return "calendar-present";
+    if (statusByDate[dateStr] === "Present") return "calendar-present";
 
     const today = new Date();
     if (date < today && !statusByDate[dateStr]) return "calendar-absent";

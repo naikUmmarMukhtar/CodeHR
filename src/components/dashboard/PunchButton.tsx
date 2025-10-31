@@ -1,19 +1,16 @@
-// @ts-nocheck
+//@ts-nocheck
 import { LogIn, LogOut, Loader2 } from "lucide-react";
 
 export default function PunchButton({
-  isCheckedIn,
+  nextActionType,
   isLoading,
-  handleCheckIn,
-  handleCheckOut,
+  recordPunch,
 }) {
-  const isCheckIn = !isCheckedIn;
-
-  const onClickHandler = () => (isCheckIn ? handleCheckIn() : handleCheckOut());
+  const isCheckIn = nextActionType === "Check-in";
 
   return (
     <button
-      onClick={onClickHandler}
+      onClick={() => recordPunch(nextActionType)}
       disabled={isLoading}
       className={`
         w-full px-6 py-2 rounded-lg font-semibold text-base

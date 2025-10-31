@@ -1,4 +1,5 @@
 // @ts-nocheck
+
 import { useMemo, useState } from "react";
 import { getAuth } from "firebase/auth";
 import { auth } from "../../firebase/config";
@@ -9,9 +10,11 @@ import {
 } from "../../api/firebaseAPI";
 import { showErrorToast, showSuccessToast } from "../../utils/toastMessage";
 import { haversineDistance } from "../../utils/distance";
+
 import { checkTimeWarnings } from "../../utils/timeValidation";
 import StatusCard from "./StatusCard";
 import PunchButton from "./PunchButton";
+import PunchLog from "./PunchLog";
 import AttendanceCalendar from "./AttendanceCalendar";
 import Announcements from "./Announcements";
 import { confirmAction } from "../../utils/ConfirmDialog";
@@ -32,98 +35,14 @@ export default function AttendancePanel({
     return punches[punches.length - 1].type === "Check-in";
   }, [punches]);
 
-  const getTodayKey = () => new Date().toLocaleDateString("en-CA");
-  const getTimeNow = () =>
-    new Date().toLocaleTimeString("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-      hour12: true,
-    });
+  const nextActionType = isCheckedIn ? "Check-out" : "Check-in";
 
-  const isBeforeNineAM = (date) => date.getHours() < 9;
-
-  const handleCheckIn = async () => {
-    const now = new Date();
-    const today = getTodayKey();
-    const timeOnly = getTimeNow();
-
-    if (isBeforeNineAM(now)) {
-      return showErrorToast("Check-in not allowed before 9:00 AM.");
-    }
-
-    const existing = await getFromFirebase(`${userId}/attendance/${today}`);
-    if (
-      existing &&
-      Object.values(existing).some(
-        (v) => v.status === "present" || v.status === "absent"
-      )
-    ) {
-      return showErrorToast("You have already checked in today.");
-    }
-
-    const warnings = checkTimeWarnings("Check-in", now);
-    let confirmed = true;
-    if (warnings.length > 0) {
-      confirmed = await confirmAction(
-        `${warnings[0]}\n\nProceed with Check-in?`
-      );
-    } else {
-      confirmed = await confirmAction("Do you want to Check-in?");
-    }
-    if (!confirmed) return;
-
-    await postToFirebase(`${userId}/attendance/${today}`, {
-      checkIn: timeOnly,
-      checkOut: "",
-      status: "absent",
-    });
-
-    setPunches((prev) => [...prev, { time: timeOnly, type: "Check-in" }]);
-    showSuccessToast("Check-in recorded successfully.");
-  };
-
-  const handleCheckOut = async () => {
-    const now = new Date();
-    const today = getTodayKey();
-    const timeOnly = getTimeNow();
-
-    const existingData = await getFromFirebase(`${userId}/attendance/${today}`);
-    if (!existingData) return showErrorToast("No check-in found for today.");
-
-    const keys = Object.keys(existingData);
-    const autoKey = keys.find((k) => k.startsWith("-"));
-    const checkInTime = autoKey
-      ? existingData[autoKey]?.checkIn || ""
-      : existingData?.checkIn || "";
-
-    const warnings = checkTimeWarnings("Check-out", now);
-    let confirmed = true;
-    if (warnings.length > 0) {
-      confirmed = await confirmAction(
-        `${warnings[0]}\n\nProceed with Check-out?`
-      );
-    } else {
-      confirmed = await confirmAction("Do you want to Check-out?");
-    }
-    if (!confirmed) return;
-
-    await putToFirebase(`${userId}/attendance/${today}`, {
-      checkIn: checkInTime,
-      checkOut: timeOnly,
-      status: "present",
-    });
-
-    setPunches((prev) => [...prev, { time: timeOnly, type: "Check-out" }]);
-    showSuccessToast("Check-out recorded successfully.");
-  };
-
-  const recordPunch = async (callback) => {
+  const recordPunch = async (type) => {
     if (!navigator.geolocation) return setMessage("Geolocation not supported.");
     if (!userId) return showErrorToast("User not authenticated.");
 
     setIsLoading(true);
-    setMessage(`Checking location before punch...`);
+    setMessage(`Attempting ${type}... Checking location...`);
 
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
@@ -135,15 +54,82 @@ export default function AttendancePanel({
           OFFICE_COORDS.lat,
           OFFICE_COORDS.lng
         );
-        console.log(dist, "...");
 
-        if (dist >= OFFICE_COORDS) {
+        if (dist >= OFFICE_RADIUS_METERS) {
+          const now = new Date();
+          const today = now.toISOString().split("T")[0];
+          const timeOnly = now.toLocaleTimeString("en-US", {
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+            hour12: true,
+          });
+
+          const warnings = checkTimeWarnings(type, now);
+
+          let confirmed = true;
+
+          // If there are warnings, show them inside the confirm dialog
+          if (warnings.length > 0) {
+            confirmed = await confirmAction(
+              `${warnings[0]}\n\nDo you still want to proceed with ${type}?`
+            );
+          } else {
+            confirmed = await confirmAction(
+              `Do you want to proceed with ${type}?`
+            );
+          }
+
+          if (!confirmed) return;
+
+          if (!confirmed) return showErrorToast(`${type} cancelled.`);
+
+          try {
+            const uid = auth.currentUser?.uid;
+
+            if (type === "Check-in") {
+              await postToFirebase(`${uid}/attendance/${today}`, {
+                checkIn: timeOnly,
+                checkOut: "",
+                status: "absent",
+              });
+            } else if (type === "Check-out") {
+              const existingData = await getFromFirebase(
+                `${uid}/attendance/${today}`
+              );
+
+              let checkInTime = "";
+
+              if (existingData) {
+                const keys = Object.keys(existingData);
+                const autoKey = keys.find((k) => k.startsWith("-"));
+                if (autoKey) {
+                  checkInTime = existingData[autoKey]?.checkIn || "";
+                } else {
+                  checkInTime = existingData?.checkIn || "";
+                }
+              }
+              console.log(existingData, "checkintitme");
+
+              await putToFirebase(`${uid}/attendance/${today}`, {
+                checkIn: checkInTime,
+                checkOut: timeOnly,
+                status: "Present",
+              });
+            }
+
+            setPunches((prev) => [...prev, { time: timeOnly, type }]);
+            setMessage(`${type} successful!`);
+            showSuccessToast(`${type} recorded successfully.`);
+          } catch (error) {
+            console.error("Firebase Error:", error);
+            showErrorToast("Failed to record attendance.");
+          }
+        } else {
           const distanceAway = Math.round(dist);
           setMessage(`❌ Outside allowed area. ${distanceAway}m away.`);
-          return showErrorToast("Punch Failed: Too far from office.");
+          showErrorToast("Punch Failed: Too far from office.");
         }
-
-        await callback();
       },
       (err) => {
         setIsLoading(false);
@@ -165,12 +151,14 @@ export default function AttendancePanel({
         </div>
         <div className="card">
           <PunchButton
-            isCheckedIn={isCheckedIn}
+            nextActionType={nextActionType}
             isLoading={isLoading}
-            handleCheckIn={() => recordPunch(handleCheckIn)}
-            handleCheckOut={() => recordPunch(handleCheckOut)}
+            recordPunch={recordPunch}
           />
         </div>
+        {/* <div className="card">
+          <PunchLog punches={punches} message={message} />
+        </div> */}
       </div>
 
       <div className="lg:col-span-2 space-y-6">

@@ -55,7 +55,7 @@ export default function AttendancePanel({
           OFFICE_COORDS.lng
         );
 
-        if (dist >= OFFICE_RADIUS_METERS) {
+        if (dist <= OFFICE_RADIUS_METERS) {
           const now = new Date();
           const today = now.toISOString().split("T")[0];
           const timeOnly = now.toLocaleTimeString("en-US", {

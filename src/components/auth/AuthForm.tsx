@@ -14,7 +14,7 @@ import { showSuccessToast } from "../../utils/toastMessage";
 import firebaseErrorMessages from "../../utils/firebaseErrorMessages";
 import { postToFirebase } from "../../api/firebaseAPI";
 
-export default function MobileAuthForm() {
+export default function AuthForm() {
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({
     name: "",
@@ -111,64 +111,62 @@ export default function MobileAuthForm() {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 bg-gray-50">
-      <div className="w-full max-w-md space-y-4">
-        <div className="relative h-full overflow-hidden rounded-xl shadow-md bg-white">
-          <div
-            className={`flex w-[200%] transition-transform duration-700 ease-in-out ${
-              isLogin ? "translate-x-0" : "-translate-x-1/2"
-            }`}
-          >
-            <div className="w-1/2 p-6 flex flex-col justify-center">
-              <LoginForm
-                formData={formData}
-                handleChange={handleChange}
-                handleSubmit={handleSubmit}
-                loading={loading}
-                error={error}
-                message={message}
-              />
-              <p className="mt-4 text-sm text-center text-gray-600">
-                Don’t have an account?{" "}
-                <button
-                  type="button"
-                  className="text-rose-500 font-semibold"
-                  onClick={() => {
-                    setIsLogin(false);
-                    clearFields();
-                    setError("");
-                    setMessage("");
-                  }}
-                >
-                  Sign Up
-                </button>
-              </p>
-            </div>
+      <div className="relative h-full overflow-hidden rounded-xl shadow-md bg-white">
+        <div
+          className={`flex w-[200%] transition-transform duration-700 ease-in-out ${
+            isLogin ? "translate-x-0" : "-translate-x-1/2"
+          }`}
+        >
+          <div className="w-1/2 p-6 flex flex-col justify-center">
+            <LoginForm
+              formData={formData}
+              handleChange={handleChange}
+              handleSubmit={handleSubmit}
+              loading={loading}
+              error={error}
+              message={message}
+            />
+            <p className="mt-4 text-sm text-center text-gray-600">
+              Don’t have an account?{" "}
+              <button
+                type="button"
+                className="text-rose-500 font-semibold"
+                onClick={() => {
+                  setIsLogin(false);
+                  clearFields();
+                  setError("");
+                  setMessage("");
+                }}
+              >
+                Sign Up
+              </button>
+            </p>
+          </div>
 
-            <div className="w-1/2 p-6 flex flex-col justify-center">
-              <RegisterForm
-                formData={formData}
-                handleChange={handleChange}
-                handleSubmit={handleSubmit}
-                loading={loading}
-                error={error}
-                message={message}
-              />
-              <p className="mt-4  text-sm text-center text-gray-600">
-                Already have an account?{" "}
-                <button
-                  type="button"
-                  className="text-rose-500 font-semibold"
-                  onClick={() => {
-                    setIsLogin(true);
-                    clearFields();
-                    setError("");
-                    setMessage("");
-                  }}
-                >
-                  Log In
-                </button>
-              </p>
-            </div>
+          <div className="w-1/2 p-6 flex flex-col justify-center">
+            <RegisterForm
+              formData={formData}
+              handleChange={handleChange}
+              handleSubmit={handleSubmit}
+              loading={loading}
+              error={error}
+              message={message}
+            />
+            <p className="mt-4  text-sm text-center text-gray-600">
+              Already have an account?{" "}
+              <button
+                type="button"
+                className="text-rose-500 font-semibold"
+                onClick={() => {
+                  setIsLogin(true);
+                  clearFields();
+                  setError("");
+                  setMessage("");
+                }}
+              >
+                Log In
+              </button>
+            </p>
           </div>
         </div>
       </div>

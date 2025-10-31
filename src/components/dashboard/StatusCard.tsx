@@ -1,32 +1,41 @@
-// import React from "react";
-import { Clock } from "lucide-react";
+//@ts-nocheck
+// StatusCard.jsx
 
-export default function StatusCard({ isCheckedIn }: { isCheckedIn: boolean }) {
+import { Clock, LogIn, LogOut } from "lucide-react";
+
+export default function StatusCard({ isCheckedIn }) {
   const statusColor = isCheckedIn
-    ? "var(--color-secondary)" // green-ish tone
-    : "var(--color-accent)"; // orange/red tone
-
-  const bgColor = "var(--color-bg-alt)";
-  const borderColor = statusColor;
+    ? "var(--color-secondary)" // checked in
+    : "var(--color-accent)"; // checked out
 
   return (
     <div
-      style={{
-        backgroundColor: bgColor,
-        border: `2px solid ${borderColor}`,
-        borderRadius: "8px",
-        padding: "1rem",
-      }}
+      className="
+        bg-(--color-bg-alt)
+        border-2 rounded-xl p-4
+        text-(--color-text)
+      "
+      style={{ borderColor: statusColor }}
     >
-      <h3
-        className="text-lg font-bold mb-1 flex items-center gap-2"
-        style={{ color: "var(--color-text)" }}
+      <div className="flex items-center gap-2 mb-2 font-semibold">
+        <Clock size={18} color={statusColor} />
+        <span>Status</span>
+      </div>
+
+      <div
+        className="flex items-center gap-2 text-lg font-bold"
+        style={{ color: statusColor }}
       >
-        <Clock size={18} color={statusColor} /> Status
-      </h3>
-      <p className="text-xl font-extrabold" style={{ color: statusColor }}>
-        {isCheckedIn ? "🟢 CHECKED IN" : "🔴 CHECKED OUT"}
-      </p>
+        {isCheckedIn ? (
+          <>
+            <LogIn size={18} /> Checked In
+          </>
+        ) : (
+          <>
+            <LogOut size={18} /> Checked Out
+          </>
+        )}
+      </div>
     </div>
   );
 }

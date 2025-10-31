@@ -1,18 +1,13 @@
 import { useState } from "react";
 import { getAuth, signOut } from "firebase/auth";
 import { useNavigate } from "react-router";
-import {
-  CalendarDays,
-  Clock,
-  LogOut,
-  MapPin,
-  User,
-  Wallet,
-} from "lucide-react";
+import { CalendarDays, Clock, User, Wallet } from "lucide-react";
 import { showErrorToast, showSuccessToast } from "../utils/toastMessage";
 import AttendancePanel from "../components/dashboard/AttendancePanel";
 import PlaceholderTab from "../components/dashboard/PlaceholderTab";
 import MobileNav from "../components/dashboard/MobileNav";
+import ContentWrapper from "../components/shared/ContentWrapper";
+import Header from "../components/shared/Header";
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState("attendance");
@@ -39,33 +34,10 @@ export default function Home() {
   ];
 
   return (
-    <div
-      className="min-h-screen flex flex-col"
-      style={{ backgroundColor: "var(--color-bg)" }}
-    >
-      <header
-        className="p-4 flex justify-between items-center border-b sticky top-0 z-10"
-        style={{
-          backgroundColor: "var(--color-bg)",
-          borderColor: "var(--color-border)",
-        }}
-      >
-        <h1
-          className="text-xl font-extrabold flex items-center gap-2"
-          style={{ color: "var(--color-primary)" }}
-        >
-          <MapPin className="text-[var(--color-accent)]" /> CodeHR
-        </h1>
-        <button
-          onClick={handleLogout}
-          className="flex items-center gap-2 text-sm transition"
-          style={{ color: "var(--color-accent)" }}
-        >
-          <LogOut size={18} /> Logout
-        </button>
-      </header>
+    <ContentWrapper>
+      <Header handleLogout={handleLogout} />
 
-      <main className="flex-1 p-6 pb-20 overflow-auto">
+      <main className="flex-1 py-6 pb-20 overflow-auto">
         <h2
           className="text-2xl font-bold mb-1"
           style={{ color: "var(--color-text)" }}
@@ -100,6 +72,6 @@ export default function Home() {
         activeTab={activeTab}
         setActiveTab={setActiveTab}
       />
-    </div>
+    </ContentWrapper>
   );
 }

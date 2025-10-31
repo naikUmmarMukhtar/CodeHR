@@ -1,5 +1,5 @@
-// import React from "react";
-// @ts-nocheck
+//@ts-nocheck
+import { LogIn, LogOut, Loader2 } from "lucide-react";
 
 export default function PunchButton({
   nextActionType,
@@ -8,36 +8,35 @@ export default function PunchButton({
 }) {
   const isCheckIn = nextActionType === "Check-in";
 
-  const buttonColor = isCheckIn
-    ? "var(--color-primary)"
-    : "var(--color-accent)";
-
-  const hoverColor = "var(--color-hover)";
-
   return (
     <button
       onClick={() => recordPunch(nextActionType)}
       disabled={isLoading}
-      style={{
-        width: "100%",
-        padding: "0.75rem",
-        borderRadius: "8px",
-        fontWeight: "bold",
-        fontSize: "1rem",
-        color: "var(--color-bg)",
-        backgroundColor: buttonColor,
-        cursor: isLoading ? "not-allowed" : "pointer",
-        opacity: isLoading ? 0.7 : 1,
-        transition: "background-color 0.2s ease",
-      }}
-      onMouseOver={(e) => {
-        if (!isLoading) e.currentTarget.style.backgroundColor = hoverColor;
-      }}
-      onMouseOut={(e) => {
-        if (!isLoading) e.currentTarget.style.backgroundColor = buttonColor;
-      }}
+      className={`
+        w-full px-6 py-2 rounded-lg font-semibold text-base
+        flex items-center justify-center gap-2
+        transition-all duration-200
+        disabled:opacity-70 disabled:cursor-not-allowed
+        text-(--color-bg)
+        ${isCheckIn ? "bg-(--color-primary)" : "bg-(--color-accent)"}
+        hover:bg-(--color-hover)
+        active:scale-95
+      `}
     >
-      {isLoading ? "Please wait..." : isCheckIn ? "Check In" : "Check Out"}
+      {isLoading ? (
+        <>
+          <Loader2 size={18} className="animate-spin" />
+          Please wait...
+        </>
+      ) : isCheckIn ? (
+        <>
+          <LogIn size={18} /> Check In
+        </>
+      ) : (
+        <>
+          <LogOut size={18} /> Check Out
+        </>
+      )}
     </button>
   );
 }

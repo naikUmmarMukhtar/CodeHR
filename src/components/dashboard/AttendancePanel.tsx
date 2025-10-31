@@ -17,7 +17,7 @@ import PunchButton from "./PunchButton";
 import PunchLog from "./PunchLog";
 import AttendanceCalendar from "./AttendanceCalendar";
 import Announcements from "./Announcements";
-import { confirmAction } from "../attendance/ConfirmDialog";
+import { confirmAction } from "../../utils/ConfirmDialog";
 import { OFFICE_COORDS, OFFICE_RADIUS_METERS } from "../../lib/constants";
 
 export default function AttendancePanel({
@@ -66,13 +66,22 @@ export default function AttendancePanel({
           });
 
           const warnings = checkTimeWarnings(type, now);
+
+          let confirmed = true;
+
+          // If there are warnings, show them inside the confirm dialog
           if (warnings.length > 0) {
-            showErrorToast(warnings[0]);
+            confirmed = await confirmAction(
+              `${warnings[0]}\n\nDo you still want to proceed with ${type}?`
+            );
+          } else {
+            confirmed = await confirmAction(
+              `Do you want to proceed with ${type}?`
+            );
           }
 
-          const confirmed = await confirmAction(
-            `Do you want to proceed with ${type}?`
-          );
+          if (!confirmed) return;
+
           if (!confirmed) return showErrorToast(`${type} cancelled.`);
 
           try {
@@ -147,9 +156,9 @@ export default function AttendancePanel({
             recordPunch={recordPunch}
           />
         </div>
-        <div className="card">
+        {/* <div className="card">
           <PunchLog punches={punches} message={message} />
-        </div>
+        </div> */}
       </div>
 
       <div className="lg:col-span-2 space-y-6">

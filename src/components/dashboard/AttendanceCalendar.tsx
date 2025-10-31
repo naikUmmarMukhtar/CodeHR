@@ -33,6 +33,8 @@ export default function AttendanceCalendar() {
     const key = Object.keys(record || {})[0];
     const actualRecord =
       record?.checkIn || record?.status ? record : record[key];
+    console.log(actualRecord, "actualrecord");
+
     if (actualRecord?.status === "Present") {
       statusByDate[date] = "present";
     }
@@ -41,8 +43,11 @@ export default function AttendanceCalendar() {
   const getTileClass = ({ date }) => {
     const day = date.getDay();
     const dateStr = date.toISOString().split("T")[0];
+    console.log(dateStr, "datestr");
 
     if (day === 0 || day === 6) return "calendar-weekend";
+    console.log(statusByDate, "statusbydate");
+
     if (statusByDate[dateStr] === "present") return "calendar-present";
 
     const today = new Date();

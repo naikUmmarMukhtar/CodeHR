@@ -5,7 +5,7 @@ import { Navigate, Route, Routes } from "react-router";
 import { auth } from "./firebase/config";
 import Loader from "./components/shared/Loader";
 import Home from "./pages/Home";
-import MobileAuthForm from "./components/auth/MobileAuthForm";
+import MobileAuthForm from "./components/auth/AuthForm";
 
 function App() {
   const [user, setUser] = useState<any>(null);
@@ -24,21 +24,10 @@ function App() {
   if (!user) return <MobileAuthForm />;
 
   return (
-    <div className="flex h-screen overflow-hidden relative">
-      <div
-        className={`
-            flex-1 overflow-y-auto bg-white transition-all duration-300 
-            ${isMobile ? "flex justify-center py-12" : " flex p-4"}
-          `}
-      >
-        <div className="w-full">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </div>
-      </div>
-    </div>
+    <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   );
 }
 

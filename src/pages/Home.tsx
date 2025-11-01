@@ -1,17 +1,28 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { getAuth, signOut } from "firebase/auth";
+import { motion } from "framer-motion";
+
 import { useNavigate } from "react-router";
 import { CalendarDays, Clock, User, Wallet } from "lucide-react";
 import { showErrorToast, showSuccessToast } from "../utils/toastMessage";
-import AttendancePanel from "../components/dashboard/AttendancePanel";
 import MobileNav from "../components/dashboard/MobileNav";
 import ContentWrapper from "../components/shared/ContentWrapper";
 import Header from "../components/shared/Header";
+import PunchButton from "../components/dashboard/PunchButton";
+import EmployeeHeader from "../components/dashboard/EmployeeHeader";
+import StatusSection from "../components/dashboard/StatusSection";
+import MessageBanner from "../components/dashboard/MessageBanner";
+import AttendanceMainContent from "../components/dashboard/AttendanceMainContent";
+import { useGeofence } from "../hooks/useGeoFence";
+import { useAttendanceActions } from "../hooks/useAttendanceActions";
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState("attendance");
+
   const [punches, setPunches] = useState([]);
   const [message, setMessage] = useState<string | null>(null);
+  const { isLoading, isInside } = useGeofence(setMessage);
+  const { handleCheckIn, handleCheckOut } = useAttendanceActions(setPunches);
 
   const navigate = useNavigate();
 
@@ -25,6 +36,33 @@ export default function Home() {
     }
   };
 
+  const isCheckedIn = useMemo(
+    () => punches.length > 0 && punches[punches.length - 1].type === "Check-in",
+    [punches]
+  );
+
+  const recordPunch = async () => {
+    if (!isInside) {
+      showErrorToast(
+        "You must be inside the office area to perform this action."
+      );
+      return;
+    }
+
+    try {
+      if (nextActionType === "Check-in") await handleCheckIn();
+      else await handleCheckOut();
+    } catch {
+      setMessage("Punch failed. Please try again.");
+    }
+  };
+
+  const nextActionType = isCheckedIn ? "Check-out" : "Check-in";
+  const status = isCheckedIn ? "Checked In" : "Not Checked In";
+  const statusColor = isCheckedIn
+    ? "var(--color-secondary)"
+    : "var(--color-accent)";
+
   const navItems = [
     { id: "attendance", name: "Attendance", icon: <Clock size={18} /> },
     { id: "profile", name: "Profile", icon: <User size={18} /> },
@@ -36,14 +74,37 @@ export default function Home() {
     <ContentWrapper>
       <Header handleLogout={handleLogout} />
 
-      <main className="flex-1 py-6 pb-20 overflow-auto">
-        <AttendancePanel
-          punches={punches}
-          setPunches={setPunches}
-          message={message}
-          setMessage={setMessage}
-        />
-      </main>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 w-full mt-6">
+        <motion.div
+          className=" flex flex-col justify-between"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+        >
+          <div className="flex justify-between">
+            <div>
+              <EmployeeHeader />
+            </div>{" "}
+            <div>
+              <PunchButton
+                nextActionType={nextActionType}
+                isLoading={isLoading}
+                recordPunch={recordPunch}
+                isInside={isInside}
+              />
+            </div>
+          </div>
+          <StatusSection
+            status={status}
+            statusColor={statusColor}
+            isInside={isInside}
+          />
+
+          {message && <MessageBanner message={message} />}
+        </motion.div>
+
+        <AttendanceMainContent punches={punches} />
+      </div>
 
       <MobileNav
         items={navItems}

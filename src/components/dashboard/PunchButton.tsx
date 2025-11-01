@@ -13,7 +13,7 @@ export default function PunchButton({
   return (
     <button
       onClick={recordPunch}
-      disabled={isLoading || !isInside}
+      disabled={isLoading}
       style={{
         backgroundColor: isCheckIn
           ? "var(--color-secondary)"

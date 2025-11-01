@@ -1,10 +1,9 @@
-//@ts-nocheck
+// @ts-nocheck
 import { useState } from "react";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   updateProfile,
-  // sendEmailVerification,
   signOut,
 } from "firebase/auth";
 import { auth } from "../../firebase/config";
@@ -61,12 +60,6 @@ export default function AuthForm() {
           email,
           password
         );
-        // if (!userCredential.user.emailVerified) {
-        //   setError("Please verify your email before logging in.");
-        //   await signOut(auth);
-        //   setLoading(false);
-        //   return;
-        // }
         showSuccessToast("Login successful.");
       } else {
         const userCredential = await createUserWithEmailAndPassword(
@@ -89,13 +82,9 @@ export default function AuthForm() {
           createdAt: new Date().toISOString(),
         });
 
-        // await sendEmailVerification(user, {
-        //   url: "https://countinghouse.netlify.app/",
-        // });
-
         await signOut(auth);
         setIsLogin(true);
-        setMessage("Verification email sent. Please check your inbox.");
+        setMessage("Account created successfully. Please log in.");
       }
 
       clearFields();
@@ -110,14 +99,21 @@ export default function AuthForm() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 bg-gray-50">
-      <div className="relative h-full overflow-hidden rounded-xl shadow-md bg-white">
+    <div className="min-h-screen flex items-center justify-center px-4">
+      <div
+        className="relative h-full overflow-hidden transition-all duration-500"
+        style={{
+          backgroundColor: "var(--color-bg)",
+          color: "var(--color-text)",
+        }}
+      >
         <div
           className={`flex w-[200%] transition-transform duration-700 ease-in-out ${
             isLogin ? "translate-x-0" : "-translate-x-1/2"
           }`}
         >
-          <div className="w-1/2 p-6 flex flex-col justify-center">
+          {/* LOGIN PANEL */}
+          <div className="w-1/2 flex flex-col justify-center">
             <LoginForm
               formData={formData}
               handleChange={handleChange}
@@ -126,16 +122,22 @@ export default function AuthForm() {
               error={error}
               message={message}
             />
-            <p className="mt-4 text-sm text-center text-gray-600">
+            <p
+              className="mt-4 text-sm text-center"
+              style={{ color: "var(--color-text-muted)" }}
+            >
               Don’t have an account?{" "}
               <button
                 type="button"
-                className="text-rose-500 font-semibold"
                 onClick={() => {
                   setIsLogin(false);
                   clearFields();
                   setError("");
                   setMessage("");
+                }}
+                style={{
+                  color: "var(--color-primary)",
+                  fontWeight: 600,
                 }}
               >
                 Sign Up
@@ -143,7 +145,7 @@ export default function AuthForm() {
             </p>
           </div>
 
-          <div className="w-1/2 p-6 flex flex-col justify-center">
+          <div className="w-1/2 flex flex-col justify-center">
             <RegisterForm
               formData={formData}
               handleChange={handleChange}
@@ -152,16 +154,22 @@ export default function AuthForm() {
               error={error}
               message={message}
             />
-            <p className="mt-4  text-sm text-center text-gray-600">
+            <p
+              className="mt-4 text-sm text-center"
+              style={{ color: "var(--color-text-muted)" }}
+            >
               Already have an account?{" "}
               <button
                 type="button"
-                className="text-rose-500 font-semibold"
                 onClick={() => {
                   setIsLogin(true);
                   clearFields();
                   setError("");
                   setMessage("");
+                }}
+                style={{
+                  color: "var(--color-primary)",
+                  fontWeight: 600,
                 }}
               >
                 Log In

@@ -24,10 +24,10 @@ export function useAttendanceActions(setPunches) {
     });
 
   const handleCheckIn = async () => {
-    if (!userId) {
-      showErrorToast("User not authenticated.");
-      return;
-    }
+    // if (!userId) {
+    //   showErrorToast("User not authenticated.");
+    //   return;
+    // }
 
     const now = new Date();
     const today = getTodayKey();

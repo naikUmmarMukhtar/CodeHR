@@ -9,7 +9,7 @@ export default function AuthPage() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-sand">
-      <div className="bg-white shadow-lg rounded-xl p-6 w-80">
+      <div className=" rounded-xl p-6 w-80">
         <h1 className="text-xl font-bold text-airbnb-coral mb-4 text-center">
           {isSignup ? "Sign Up" : "Login"}
         </h1>

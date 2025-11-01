@@ -2,11 +2,12 @@
 
 import { useState } from "react";
 import { useIsMobile } from "../../hooks/useIsMobile";
-import type { LoginSignUpFormProps } from "../../types";
 import { AlertTriangle } from "lucide-react";
 import { useRegisterValidation } from "../../hooks/useRegisterValidation";
 import FormInput from "../shared/FormInput";
 import PasswordCriteria from "./PasswordCriteria";
+import ContentWrapper from "../shared/ContentWrapper";
+import AuthHeader from "./AuthHeader";
 
 export default function RegisterForm({
   formData,
@@ -15,20 +16,13 @@ export default function RegisterForm({
   loading,
   error,
   message,
-}: LoginSignUpFormProps) {
-  type RegisterFormData = {
-    email: string;
-    username: string; // <-- required
-    password: string;
-    confirmPassword: string;
-  };
+}) {
   const isMobile = useIsMobile();
   const [submitted, setSubmitted] = useState(false);
-
   const { errors } = useRegisterValidation(formData);
   const hasErrors = submitted && Object.keys(errors).length > 0;
 
-  const onSubmit = (e: React.FormEvent) => {
+  const onSubmit = (e) => {
     e.preventDefault();
     setSubmitted(true);
     if (Object.keys(errors).length === 0) handleSubmit(e);
@@ -37,38 +31,27 @@ export default function RegisterForm({
   return (
     <form
       onSubmit={onSubmit}
-      className={`bg-white flex flex-col justify-center h-full ${
-        isMobile ? "p-4" : "p-12"
-      } text-center space-y-4`}
+      className={`flex flex-col justify-center h-full  text-center space-y-6`}
     >
-      <div className="text-center space-y-2">
-        <img src="/logo.png" alt="Logo" className="w-20 h-20 mx-auto" />
-        <h1 className="text-2xl font-bold text-gray-800">Create new account</h1>
-        <p className="text-sm text-gray-500">Sign up to get started</p>
-      </div>
+      <AuthHeader mode="register" />
 
       {hasErrors && (
-        <div className="flex items-center gap-2 text-sm text-red-600">
+        <div
+          className="flex items-center gap-2 text-sm p-2 rounded-md justify-center"
+          style={{
+            color: "var(--color-accent)",
+          }}
+        >
           <AlertTriangle size={18} />
-          All fields are required or invalid.
+          <span>Fill All Required Fields</span>
         </div>
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <FormInput
-          label="Email address"
-          name="email"
-          type="email"
-          required
-          value={formData.email}
-          onChange={handleChange}
-          error={submitted ? errors.email : ""}
-        />
-        <FormInput
-          label="Username"
+          label="User Name (as per ID)"
           name="username"
           type="text"
-          required
           value={formData.username}
           onChange={handleChange}
           error={submitted ? errors.username : ""}
@@ -77,20 +60,29 @@ export default function RegisterForm({
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <FormInput
-          label="Create password"
+          label="Email Address"
+          name="email"
+          type="email"
+          value={formData.email}
+          onChange={handleChange}
+          error={submitted ? errors.email : ""}
+        />
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <FormInput
+          label="Create Password"
           name="password"
           type="password"
-          required
           value={formData.password}
           onChange={handleChange}
           error={submitted ? errors.password : ""}
         />
         <FormInput
-          label="Confirm password"
+          label="Confirm Password"
           name="confirmPassword"
           type="password"
-          required
-          value={formData?.confirmPassword}
+          value={formData.confirmPassword}
           onChange={handleChange}
           error={submitted ? errors.confirmPassword : ""}
         />
@@ -98,12 +90,37 @@ export default function RegisterForm({
 
       <PasswordCriteria password={formData.password} showColors={submitted} />
 
-      {error && <div className="text-red-700 text-sm">{error}</div>}
-      {message && <div className="text-green-700 text-sm">{message}</div>}
+      {error && (
+        <div
+          className="text-sm font-medium rounded-md p-2"
+          style={{
+            color: "var(--color-accent)",
+          }}
+        >
+          {error}
+        </div>
+      )}
+      {message && (
+        <div
+          className="text-sm font-medium rounded-md p-2"
+          style={{
+            color: "var(--color-secondary)",
+          }}
+        >
+          {message}
+        </div>
+      )}
 
+      {/* Submit Button */}
       <button
         disabled={loading}
-        className="w-full bg-rose-500 text-white rounded-full px-8 py-3 text-sm font-bold uppercase mt-2 disabled:opacity-60 disabled:cursor-not-allowed"
+        className="w-full rounded-full py-3 text-sm font-bold uppercase mt-2 transition-all"
+        style={{
+          backgroundColor: "var(--color-primary)",
+          color: "white",
+          opacity: loading ? 0.6 : 1,
+          cursor: loading ? "not-allowed" : "pointer",
+        }}
       >
         {loading ? "Signing Up..." : "Sign Up"}
       </button>

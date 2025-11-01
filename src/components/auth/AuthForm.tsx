@@ -45,7 +45,7 @@ export default function AuthForm() {
     setMessage("");
     setLoading(true);
 
-    const { name, email, password, confirmPassword } = formData;
+    const { username, email, password, confirmPassword } = formData;
 
     try {
       if (!isLogin && password !== confirmPassword) {
@@ -69,20 +69,21 @@ export default function AuthForm() {
         );
         const user = userCredential.user;
 
-        await updateProfile(user, {
-          displayName: name || email.split("@")[0],
-        });
+        // await updateProfile(user, {
+        //   displayName: name || email.split("@")[0],
+        // });
 
         const uid = auth.currentUser?.uid;
         if (!uid) throw new Error("User not authenticated");
 
         await postToFirebase(`${uid}/userDetails`, {
-          email: user.email,
-          displayName: user.displayName,
+          userName: username,
+          email: email,
+          password: password,
           createdAt: new Date().toISOString(),
         });
 
-        await signOut(auth);
+        // await signOut(auth);
         setIsLogin(true);
         setMessage("Account created successfully. Please log in.");
       }

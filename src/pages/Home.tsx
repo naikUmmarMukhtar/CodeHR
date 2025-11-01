@@ -1,8 +1,7 @@
-//@ts-nocheck
-import { useMemo, useState } from "react";
+// @ts-nocheck
+import { useEffect, useMemo, useState } from "react";
 import { getAuth, signOut } from "firebase/auth";
 import { motion } from "framer-motion";
-
 import { useNavigate } from "react-router";
 import { CalendarDays, Clock, User, Wallet } from "lucide-react";
 import { showErrorToast, showSuccessToast } from "../utils/toastMessage";
@@ -16,16 +15,44 @@ import EmployeeHeader from "../components/dashboard/EmployeeHeader";
 import StatusSection from "../components/dashboard/StatusSection";
 import MessageBanner from "../components/dashboard/MessageBanner";
 import AttendanceMainContent from "../components/dashboard/AttendanceMainContent";
+import { getFromFirebase } from "../api/firebaseAPI";
+import { auth } from "../firebase/config";
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState("attendance");
-
+  const [employeeName, setEmployeeName] = useState<string | null>(null);
   const [punches, setPunches] = useState([]);
   const [message, setMessage] = useState<string | null>(null);
+
   const { isLoading, isInside } = useGeofence(setMessage);
   const { handleCheckIn, handleCheckOut } = useAttendanceActions(setPunches);
-
   const navigate = useNavigate();
+  const uid = auth.currentUser?.uid;
+
+  useEffect(() => {
+    const fetchEmployeeDetails = async () => {
+      if (!uid) return;
+      try {
+        const details = await getFromFirebase(`${uid}/userDetails`);
+        console.log("Raw Firebase details:", details);
+
+        // ✅ Extract the first nested object (since key is a random ID)
+        const employeeRecord = details ? Object.values(details)[0] : null;
+
+        if (employeeRecord?.userName) {
+          setEmployeeName(employeeRecord.userName);
+        } else if (employeeRecord?.displayName) {
+          setEmployeeName(employeeRecord.displayName);
+        } else if (employeeRecord?.email) {
+          setEmployeeName(employeeRecord.email.split("@")[0]);
+        }
+      } catch (error) {
+        console.error("Error fetching employee details:", error);
+      }
+    };
+
+    fetchEmployeeDetails();
+  }, [uid]);
 
   const handleLogout = async () => {
     try {
@@ -77,24 +104,22 @@ export default function Home() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 w-full mt-6">
         <motion.div
-          className=" flex flex-col justify-between"
+          className="flex flex-col justify-between"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
         >
-          <div className="flex justify-between">
-            <div>
-              <EmployeeHeader />
-            </div>{" "}
-            <div>
-              <PunchButton
-                nextActionType={nextActionType}
-                isLoading={isLoading}
-                recordPunch={recordPunch}
-                isInside={isInside}
-              />
-            </div>
+          <div className="flex justify-between items-start">
+            <EmployeeHeader employeeName={employeeName} />
+
+            <PunchButton
+              nextActionType={nextActionType}
+              isLoading={isLoading}
+              recordPunch={recordPunch}
+              isInside={isInside}
+            />
           </div>
+
           <StatusSection
             status={status}
             statusColor={statusColor}

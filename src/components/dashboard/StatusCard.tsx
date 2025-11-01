@@ -1,41 +1,25 @@
-//@ts-nocheck
-// StatusCard.jsx
-
-import { Clock, LogIn, LogOut } from "lucide-react";
+// @ts-nocheck
+import { Clock, ClockPlus, BadgeCheck } from "lucide-react";
 
 export default function StatusCard({ isCheckedIn }) {
+  const status = isCheckedIn ? "Checked In" : "Checked Out";
+  const Icon = isCheckedIn ? BadgeCheck : ClockPlus;
   const statusColor = isCheckedIn
-    ? "var(--color-secondary)" // checked in
-    : "var(--color-accent)"; // checked out
+    ? "var(--color-secondary)"
+    : "var(--color-accent)";
 
   return (
-    <div
-      className="
-        bg-(--color-bg-alt)
-        border-2 rounded-xl p-4
-        text-(--color-text)
-      "
-      style={{ borderColor: statusColor }}
-    >
-      <div className="flex items-center gap-2 mb-2 font-semibold">
-        <Clock size={18} color={statusColor} />
-        <span>Status</span>
-      </div>
+    <section className="w-full" style={{ backgroundColor: "var(--color-bg)" }}>
+      <header className="flex items-center gap-2 text-sm mb-3">
+        <Clock size={18} style={{ color: "var(--color-text-muted)" }} />
+        <span style={{ color: "var(--color-text-muted)" }}>Status</span>
+      </header>
 
-      <div
-        className="flex items-center gap-2 text-lg font-bold"
-        style={{ color: statusColor }}
-      >
-        {isCheckedIn ? (
-          <>
-            <LogIn size={18} /> Checked In
-          </>
-        ) : (
-          <>
-            <LogOut size={18} /> Checked Out
-          </>
-        )}
+      <div className="flex items-center gap-3">
+        <span className="text-sm font-semibold" style={{ color: statusColor }}>
+          {status}
+        </span>
       </div>
-    </div>
+    </section>
   );
 }

@@ -14,3 +14,7 @@ export const OFFICE_RADIUS_METERS = 200;
 export const CHECKIN_START = { hour: 9, minute: 45 };
 export const CHECKIN_END = { hour: 10, minute: 15 };
 export const CHECKOUT_MIN = { hour: 17, minute: 0 };
+
+export const FIXED_HOLIDAYS = ["2025-01-01", "2025-08-15", "2025-12-25"];
+
+export const WEEKEND_DAYS = [0, 6]; // 0 = Sunday, 6 = Saturday

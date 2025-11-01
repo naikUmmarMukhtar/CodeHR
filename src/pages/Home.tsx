@@ -37,23 +37,6 @@ export default function Home() {
       <Header handleLogout={handleLogout} />
 
       <main className="flex-1 py-6 pb-20 overflow-auto">
-        <h2
-          className="text-2xl font-bold mb-1"
-          style={{ color: "var(--color-text)" }}
-        >
-          Hello, Employee
-        </h2>
-        <p
-          className="text-sm mb-6"
-          style={{ color: "var(--color-text-muted)" }}
-        >
-          {new Date().toLocaleDateString("en-US", {
-            weekday: "long",
-            day: "numeric",
-            month: "long",
-          })}
-        </p>
-
         <AttendancePanel
           punches={punches}
           setPunches={setPunches}

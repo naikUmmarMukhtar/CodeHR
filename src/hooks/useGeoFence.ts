@@ -34,8 +34,8 @@ export function useGeofence(setMessage) {
         setIsInside(inside);
         setMessage(
           inside
-            ? `✅ Inside office (${Math.round(distance)}m away)`
-            : `❌ Outside office (${Math.round(distance)}m away)`
+            ? `Inside office (${Math.round(distance)}m away)`
+            : `Outside office (${Math.round(distance)}m away)`
         );
       },
       (err) => {

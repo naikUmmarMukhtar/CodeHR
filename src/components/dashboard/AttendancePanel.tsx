@@ -1,11 +1,13 @@
 // @ts-nocheck
-import { useMemo, useState } from "react";
-import StatusCard from "./StatusCard";
-import PunchButton from "./PunchButton";
-import AttendanceCalendar from "./AttendanceCalendar";
-import Announcements from "./Announcements";
+import { motion } from "framer-motion";
+import EmployeeHeader from "./EmployeeHeader";
+import StatusSection from "./StatusSection";
+import MessageBanner from "./MessageBanner";
+import AttendanceMainContent from "./AttendanceMainContent";
+import { useMemo } from "react";
 import { useGeofence } from "../../hooks/useGeoFence";
 import { useAttendanceActions } from "../../hooks/useAttendanceActions";
+import PunchButton from "./PunchButton";
 
 export default function AttendancePanel({
   punches,
@@ -22,64 +24,57 @@ export default function AttendancePanel({
   );
 
   const nextActionType = isCheckedIn ? "Check-out" : "Check-in";
+  const status = isCheckedIn ? "Checked In" : "Not Checked In";
+  const statusColor = isCheckedIn
+    ? "var(--color-secondary)"
+    : "var(--color-accent)";
 
   const recordPunch = async () => {
     if (!isInside) {
-      setMessage("You must be inside the office area.");
+      setMessage("You must be inside the office area to perform this action.");
       return;
     }
 
     try {
-      if (nextActionType === "Check-in") {
-        await handleCheckIn();
-      } else {
-        await handleCheckOut();
-      }
+      if (nextActionType === "Check-in") await handleCheckIn();
+      else await handleCheckOut();
     } catch {
       setMessage("Punch failed. Please try again.");
     }
   };
 
   return (
-    <div
-      className="grid grid-cols-1 lg:grid-cols-3 gap-6"
-      style={{ backgroundColor: "var(--color-bg)" }}
-    >
-      <div className="lg:col-span-1 space-y-4">
-        <div className="card">
-          <StatusCard isCheckedIn={isCheckedIn} />
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 w-full">
+      <motion.div
+        className=" flex flex-col justify-between"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+      >
+        <div className="flex justify-between">
+          <div>
+            <EmployeeHeader />
+          </div>{" "}
+          <div>
+            <PunchButton
+              nextActionType={nextActionType}
+              isLoading={isLoading}
+              recordPunch={recordPunch}
+              isInside={isInside}
+            />
+          </div>
         </div>
-        <div className="card">
-          <PunchButton
-            nextActionType={nextActionType}
-            isLoading={isLoading}
-            recordPunch={recordPunch}
-          />
-        </div>
-      </div>
+        <StatusSection
+          status={status}
+          statusColor={statusColor}
+          isInside={isInside}
+        />
 
-      {message && (
-        <p
-          className={`text-sm font-medium text-center ${
-            message.includes("❌")
-              ? "text-red-500"
-              : message.includes("✅")
-              ? "text-green-600"
-              : "text-yellow-600"
-          }`}
-        >
-          {message}
-        </p>
-      )}
+        {message && <MessageBanner message={message} />}
+      </motion.div>
 
-      <div className="lg:col-span-2 space-y-6">
-        <div className="card">
-          <AttendanceCalendar punches={punches} />
-        </div>
-        <div className="card">
-          <Announcements />
-        </div>
-      </div>
+      {/* Right content */}
+      <AttendanceMainContent punches={punches} />
     </div>
   );
 }

@@ -56,7 +56,7 @@ export default function AttendanceCalendar() {
   if (loading) return <p>Loading attendance...</p>;
 
   return (
-    <div style={{ padding: "1rem" }}>
+    <div style={{ padding: "1rem 0" }}>
       <h3
         style={{
           fontWeight: "bold",

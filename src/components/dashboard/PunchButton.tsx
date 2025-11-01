@@ -1,42 +1,40 @@
-//@ts-nocheck
-import { LogIn, LogOut, Loader2 } from "lucide-react";
+// @ts-nocheck
+import { ClockPlus, BadgeCheck, Loader2 } from "lucide-react";
 
 export default function PunchButton({
   nextActionType,
   isLoading,
   recordPunch,
+  isInside,
 }) {
   const isCheckIn = nextActionType === "Check-in";
+  const ButtonIcon = isCheckIn ? ClockPlus : BadgeCheck;
 
   return (
     <button
-      onClick={() => recordPunch(nextActionType)}
-      disabled={isLoading}
+      onClick={recordPunch}
+      disabled={isLoading || !isInside}
+      style={{
+        backgroundColor: isCheckIn
+          ? "var(--color-secondary)"
+          : "var(--color-primary)",
+        color: "var(--color-bg)",
+        opacity: isLoading || !isInside ? 0.6 : 1,
+        cursor: isLoading || !isInside ? "not-allowed" : "pointer",
+      }}
       className={`
-        w-full px-6 py-2 rounded-lg font-semibold text-base
-        flex items-center justify-center gap-2
-        transition-all duration-200
-        disabled:opacity-70 disabled:cursor-not-allowed
-        text-(--color-bg)
-        ${isCheckIn ? "bg-(--color-primary)" : "bg-(--color-accent)"}
-        hover:bg-(--color-hover)
-        active:scale-95
+        px-5 py-2 rounded-md font-medium
+        flex items-center gap-2
+        transition-opacity duration-200
+        hover:opacity-90
       `}
     >
       {isLoading ? (
-        <>
-          <Loader2 size={18} className="animate-spin" />
-          Please wait...
-        </>
-      ) : isCheckIn ? (
-        <>
-          <LogIn size={18} /> Check In
-        </>
+        <Loader2 size={18} className="animate-spin" />
       ) : (
-        <>
-          <LogOut size={18} /> Check Out
-        </>
+        <ButtonIcon size={18} />
       )}
+      {isLoading ? "Processing..." : isCheckIn ? "Check In" : "Check Out"}
     </button>
   );
 }

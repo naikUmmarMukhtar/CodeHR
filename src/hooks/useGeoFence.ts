@@ -19,6 +19,9 @@ export function useGeofence(setMessage) {
       (pos) => {
         const { latitude, longitude, accuracy } = pos.coords;
         const safeAccuracy = isNaN(accuracy) ? 0 : Math.min(accuracy, 100);
+        console.log(latitude, longitude);
+        console.log(OFFICE_COORDS.lat, OFFICE_COORDS.lng);
+
         const distance = haversineDistance(
           latitude,
           longitude,

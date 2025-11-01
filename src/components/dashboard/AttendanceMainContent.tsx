@@ -2,7 +2,6 @@
 import { motion } from "framer-motion";
 import { Clock } from "lucide-react";
 import AttendanceCalendar from "./AttendanceCalendar";
-import Announcements from "./Announcements";
 
 export default function AttendanceMainContent({ punches }) {
   return (

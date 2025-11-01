@@ -22,10 +22,6 @@ export default function AttendanceMainContent({ punches }) {
         </h3>
         <AttendanceCalendar punches={punches} />
       </div>
-
-      <div className="bg-(--color-bg) rounded-2xl shadow-sm border border-(--color-border) p-6">
-        <Announcements />
-      </div>
     </motion.div>
   );
 }

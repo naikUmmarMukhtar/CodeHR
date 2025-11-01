@@ -1,14 +1,18 @@
-//@ts-nocheck
+// @ts-nocheck
 export default function EmployeeHeader({ employeeName }) {
-  console.log(employeeName);
-
   return (
-    <div>
+    <div className="overflow-hidden">
       <h2
-        className="text-xl font-semibold mb-1"
-        style={{ color: "var(--color-text)" }}
+        className="text-xl font-semibold mb-1 truncate"
+        style={{ color: "var(--color-text)", maxWidth: "100%" }}
+        title={employeeName} // shows full name on hover
       >
-        <span style={{ color: "var(--color-black)" }}>{employeeName}</span>
+        <span
+          style={{ color: "var(--color-black)" }}
+          className="block truncate"
+        >
+          {employeeName}
+        </span>
       </h2>
       <p className="text-sm mb-6" style={{ color: "var(--color-text-muted)" }}>
         {new Date().toLocaleDateString("en-US", {

@@ -23,7 +23,7 @@ export default function PunchButton({
         cursor: isLoading || !isInside ? "not-allowed" : "pointer",
       }}
       className={`
-        px-5 py-2 rounded-md font-medium
+        px-4 py-2 rounded-md font-medium
         flex items-center gap-2
         transition-opacity duration-200
         hover:opacity-90

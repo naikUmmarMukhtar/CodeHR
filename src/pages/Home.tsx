@@ -17,6 +17,7 @@ import MessageBanner from "../components/dashboard/MessageBanner";
 import AttendanceMainContent from "../components/dashboard/AttendanceMainContent";
 import { getFromFirebase } from "../api/firebaseAPI";
 import { auth } from "../firebase/config";
+import Announcements from "../components/dashboard/Announcements";
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState("attendance");
@@ -36,7 +37,6 @@ export default function Home() {
         const details = await getFromFirebase(`${uid}/userDetails`);
         console.log("Raw Firebase details:", details);
 
-        // ✅ Extract the first nested object (since key is a random ID)
         const employeeRecord = details ? Object.values(details)[0] : null;
 
         if (employeeRecord?.userName) {
@@ -71,9 +71,7 @@ export default function Home() {
 
   const recordPunch = async () => {
     if (!isInside) {
-      showErrorToast(
-        "You must be inside the office area to perform this action."
-      );
+      showErrorToast("You’re too far from the office.");
       return;
     }
 
@@ -102,16 +100,23 @@ export default function Home() {
     <ContentWrapper>
       <Header handleLogout={handleLogout} />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 w-full mt-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 w-full mt-6 mb-24">
         <motion.div
           className="flex flex-col justify-between"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
         >
-          <div className="flex justify-between items-start">
+          <div className="grid ">
             <EmployeeHeader employeeName={employeeName} />
+          </div>
 
+          <div className="flex justify-between ">
+            <StatusSection
+              status={status}
+              statusColor={statusColor}
+              isInside={isInside}
+            />
             <PunchButton
               nextActionType={nextActionType}
               isLoading={isLoading}
@@ -120,16 +125,11 @@ export default function Home() {
             />
           </div>
 
-          <StatusSection
-            status={status}
-            statusColor={statusColor}
-            isInside={isInside}
-          />
-
           {message && <MessageBanner message={message} />}
         </motion.div>
 
         <AttendanceMainContent punches={punches} />
+        <Announcements />
       </div>
 
       <MobileNav

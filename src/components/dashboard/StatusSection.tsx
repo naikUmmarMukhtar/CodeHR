@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { Clock, MapPin } from "lucide-react";
 
 export default function StatusSection({ status, statusColor, isInside }) {

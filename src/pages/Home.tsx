@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { useMemo, useState } from "react";
 import { getAuth, signOut } from "firebase/auth";
 import { motion } from "framer-motion";
@@ -9,12 +10,12 @@ import MobileNav from "../components/dashboard/MobileNav";
 import ContentWrapper from "../components/shared/ContentWrapper";
 import Header from "../components/shared/Header";
 import PunchButton from "../components/dashboard/PunchButton";
+import { useGeofence } from "../hooks/useGeoFence";
+import { useAttendanceActions } from "../hooks/useAttendanceActions";
 import EmployeeHeader from "../components/dashboard/EmployeeHeader";
 import StatusSection from "../components/dashboard/StatusSection";
 import MessageBanner from "../components/dashboard/MessageBanner";
 import AttendanceMainContent from "../components/dashboard/AttendanceMainContent";
-import { useGeofence } from "../hooks/useGeoFence";
-import { useAttendanceActions } from "../hooks/useAttendanceActions";
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState("attendance");

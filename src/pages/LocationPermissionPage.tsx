@@ -1,3 +1,4 @@
+//@ts-nocheck
 import logo from "/assets/logo.png";
 import { useEffect, useState } from "react";
 

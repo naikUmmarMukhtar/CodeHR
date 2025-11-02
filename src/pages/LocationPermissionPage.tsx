@@ -44,7 +44,7 @@ const LocationPermissionPage = ({ setLocationAllowed }) => {
 
   return (
     <div
-      className="flex flex-col items-center justify-center h-screen text-center px-6 text-justify"
+      className="flex flex-col items-center justify-center h-screen  px-6 text-justify"
       style={{ backgroundColor: "var(--color-bg)" }}
     >
       <img

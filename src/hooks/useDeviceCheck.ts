@@ -1,29 +1,43 @@
 // src/hooks/useDeviceCheck.ts
-//@ts-nocheck
 import { useEffect, useState } from "react";
 
 export const useDeviceCheck = () => {
   const [isMobileDevice, setIsMobileDevice] = useState<boolean | null>(null);
 
   useEffect(() => {
-    const checkPlatform = () => {
-      const ua =
-        navigator.userAgent || navigator.vendor || (window as any).opera;
+    const checkPlatform = async () => {
+      // 🆕 Prefer userAgentData if available (modern browsers)
+      const uaData = (navigator as any).userAgentData;
+      const ua = navigator.userAgent.toLowerCase();
 
-      // Check for mobile device user agents
-      const isMobileUA =
-        /android/i.test(ua) || (/iphone|ipod/i.test(ua) && !window.MSStream);
+      // ✅ Detect Android or iOS via UA
+      const isAndroid = /android/.test(ua);
+      const isIOS = /iphone|ipad|ipod/.test(ua);
 
-      // Exclude iPads and tablets
-      const isTabletUA = /ipad/i.test(ua) || /tablet/i.test(ua);
+      // ✅ Detect desktop using userAgentData or fallback UA checks
+      let isDesktop = false;
 
-      // Additional check: screen size (optional but helpful)
-      const isSmallScreen = window.innerWidth <= 768;
+      if (uaData?.platform) {
+        const platform = uaData.platform.toLowerCase();
+        isDesktop =
+          platform.includes("windows") ||
+          platform.includes("mac") ||
+          platform.includes("linux");
+      } else {
+        // Fallback for browsers without UA-CH support
+        isDesktop =
+          /windows|macintosh|linux/.test(ua) &&
+          !/android|iphone|ipad|ipod/.test(ua);
+      }
 
-      // Final decision: must be mobile UA, not tablet, and small screen
-      const isPhysicalMobile = isMobileUA && !isTabletUA && isSmallScreen;
-
-      setIsMobileDevice(isPhysicalMobile);
+      if (isAndroid || isIOS) {
+        setIsMobileDevice(true);
+      } else if (isDesktop) {
+        setIsMobileDevice(false);
+      } else {
+        // Fallback for ChromeOS, SmartTVs, etc.
+        setIsMobileDevice(/mobile|tablet/.test(ua));
+      }
     };
 
     checkPlatform();

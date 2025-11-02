@@ -11,7 +11,7 @@ export default function MobileOnlyPage() {
       <img
         src={logo}
         alt="CodeHR Logo"
-        className="w-full h-24 mb-4 object-contain"
+        className="w-full h-16 mb-4 object-contain"
       />
 
       {/* Icon + Title */}

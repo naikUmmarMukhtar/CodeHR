@@ -9,7 +9,7 @@ const LocationPermissionPage = () => {
 
   return (
     <div
-      className="flex flex-col justify-between h-screen text-center px-6"
+      className="flex flex-col justify-between h-[95vh] text-center px-6"
       style={{ backgroundColor: "var(--color-bg)" }}
     >
       {/* Center content */}

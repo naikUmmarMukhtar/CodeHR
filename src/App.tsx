@@ -30,39 +30,64 @@ function App() {
     }
 
     const checkLocationPermission = async () => {
-      if (!("permissions" in navigator)) {
-        // Fallback: simple getCurrentPosition check
-        if ("geolocation" in navigator) {
-          navigator.geolocation.getCurrentPosition(
-            () => setLocationAllowed(true),
-            () => setLocationAllowed(false)
-          );
-        } else {
-          setLocationAllowed(false);
-        }
+      // iOS and some browsers may not support permissions API
+      if (!("geolocation" in navigator)) {
+        setLocationAllowed(false);
         return;
       }
 
       try {
-        const permission = await navigator.permissions.query({
-          name: "geolocation" as PermissionName,
-        });
+        if ("permissions" in navigator && navigator.permissions.query) {
+          const permission = await navigator.permissions.query({
+            name: "geolocation" as PermissionName,
+          });
 
-        setLocationAllowed(permission.state === "granted");
+          if (permission.state === "granted") {
+            setLocationAllowed(true);
+          } else if (permission.state === "prompt") {
+            // Try to verify actual access silently
+            navigator.geolocation.getCurrentPosition(
+              () => setLocationAllowed(true),
+              () => setLocationAllowed(false)
+            );
+          } else {
+            setLocationAllowed(false);
+          }
 
-        permission.onchange = () => {
-          setLocationAllowed(permission.state === "granted");
-        };
+          permission.onchange = () => {
+            setLocationAllowed(permission.state === "granted");
+          };
+        } else {
+          // Safari fallback
+          navigator.geolocation.getCurrentPosition(
+            () => setLocationAllowed(true),
+            () => setLocationAllowed(false)
+          );
+        }
       } catch (error) {
         console.error("Error checking location permission:", error);
         setLocationAllowed(false);
       }
     };
 
+    // Load from localStorage first (to avoid brief flash)
+    const savedPermission = localStorage.getItem("locationAllowed");
+    if (savedPermission !== null) {
+      setLocationAllowed(savedPermission === "true");
+    }
+
+    // Always re-check in the background
     checkLocationPermission();
 
     return () => unsubscribe();
   }, []);
+
+  // Persist location permission state
+  useEffect(() => {
+    if (locationAllowed !== null) {
+      localStorage.setItem("locationAllowed", String(locationAllowed));
+    }
+  }, [locationAllowed]);
 
   if (loading || locationAllowed === null) return <Loader />;
 
@@ -70,6 +95,7 @@ function App() {
 
   if (!user) return <MobileAuthForm />;
 
+  // Optional: Uncomment if you want to show a holiday page
   // if (isHoliday) return <HolidayPage />;
 
   return (

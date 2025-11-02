@@ -38,7 +38,15 @@ const LocationPermissionPage = ({ setLocationAllowed }) => {
   useEffect(() => {
     checkLocation();
   }, []);
-
+  const onRetry = () => {
+    if (!("geolocation" in navigator)) {
+      setStatusMessage("Geolocation is not supported by your browser.");
+      setIsChecking(false);
+      return;
+    } else {
+      setIsChecking(true);
+    }
+  };
   if (locationEnabled) return null;
 
   return (
@@ -85,7 +93,7 @@ const LocationPermissionPage = ({ setLocationAllowed }) => {
       </p>
 
       <button
-        onClick={checkLocation}
+        onClick={onRetry}
         disabled={isChecking}
         className="px-6 py-2 rounded-lg font-semibold text-sm transition disabled:opacity-60 hover:opacity-90"
         style={{

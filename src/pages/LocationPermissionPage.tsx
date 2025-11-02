@@ -1,11 +1,22 @@
 // @ts-nocheck
 import logo from "/assets/logo.png";
 import { useLocationPermission } from "../hooks/useLocationPermission";
+import { useState } from "react";
 
 const LocationPermissionPage = () => {
   const { locationAllowed, retryLocationCheck } = useLocationPermission();
+  const [isChecking, setIsChecking] = useState(false);
 
   if (locationAllowed) return null;
+
+  const handleRetry = async () => {
+    setIsChecking(true);
+    try {
+      await retryLocationCheck();
+    } finally {
+      setIsChecking(false);
+    }
+  };
 
   return (
     <div
@@ -42,22 +53,22 @@ const LocationPermissionPage = () => {
           your work location securely.
         </p>
 
-        {/* ✅ Retry Button */}
         <button
-          onClick={retryLocationCheck}
-          className="bg-(--color-primary) text-(--color-bg) px-4 py-2 rounded-md text-sm font-medium "
+          onClick={handleRetry}
+          disabled={isChecking}
+          className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
+            isChecking
+              ? "bg-(--color-secondary) text-(--color-bg) cursor-not-allowed opacity-80"
+              : "bg-(--color-primary) text-(--color-bg) hover:bg-(--color-hover)"
+          }`}
         >
-          Enable Location
+          {isChecking ? "Checking location..." : "Enable Location"}
         </button>
       </div>
 
-      {/* Bottom privacy note */}
-
-      {locationAllowed === false && (
-        <p className="text-xs mt-10 text-(--color-primary)">
-          Location access is blocked. Enable it from your browser settings.
-        </p>
-      )}
+      <p className="text-xs mt-10 text-(--color-primary)">
+        Location access is required to continue.
+      </p>
     </div>
   );
 };

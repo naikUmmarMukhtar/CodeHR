@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { Navigate, Route, Routes } from "react-router";
 import { auth } from "./firebase/config";
+
 import Loader from "./components/shared/Loader";
 import Home from "./pages/Home";
 import MobileAuthForm from "./components/auth/AuthForm";
@@ -19,11 +20,13 @@ function App() {
   const [locationAllowed, setLocationAllowed] = useState<boolean | null>(null);
 
   useEffect(() => {
+    // 🔹 Watch auth state
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       setLoading(false);
     });
 
+    // 🔹 Check if today is holiday or weekend
     const today = new Date();
     const todayStr = today.toISOString().split("T")[0];
     const dayOfWeek = today.getDay();
@@ -31,6 +34,7 @@ function App() {
       setIsHoliday(true);
     }
 
+    // 🔹 Check current location permission
     const checkLocationPermission = async () => {
       if (!("geolocation" in navigator)) {
         setLocationAllowed(false);
@@ -45,21 +49,17 @@ function App() {
 
           if (permission.state === "granted") {
             setLocationAllowed(true);
-            if (granted) window.location.reload();
-          } else if (permission.state === "prompt") {
-            // Try to verify actual access silently
-            navigator.geolocation.getCurrentPosition(
-              () => setLocationAllowed(true),
-              () => setLocationAllowed(false)
-            );
           } else {
             setLocationAllowed(false);
           }
 
+          // 👇 React to user granting location later
           permission.onchange = () => {
-            setLocationAllowed(permission.state === "granted");
+            const granted = permission.state === "granted";
+            setLocationAllowed(granted);
           };
         } else {
+          // Fallback for older browsers
           navigator.geolocation.getCurrentPosition(
             () => setLocationAllowed(true),
             () => setLocationAllowed(false)
@@ -71,6 +71,7 @@ function App() {
       }
     };
 
+    // 🔹 Restore saved permission state (optional)
     const savedPermission = localStorage.getItem("locationAllowed");
     if (savedPermission !== null) {
       setLocationAllowed(savedPermission === "true");
@@ -78,15 +79,26 @@ function App() {
 
     checkLocationPermission();
 
-    return () => unsubscribe();
+    // 🔹 Listen for custom “location granted” event
+    const handleGrant = () => setLocationAllowed(true);
+    window.addEventListener("location-granted", handleGrant);
+
+    return () => {
+      unsubscribe();
+      window.removeEventListener("location-granted", handleGrant);
+    };
   }, []);
 
+  // 🔹 Save permission state to localStorage
   useEffect(() => {
     if (locationAllowed !== null) {
       localStorage.setItem("locationAllowed", String(locationAllowed));
     }
   }, [locationAllowed]);
 
+  // -------------------------------
+  // 🔹 Conditional Rendering
+  // -------------------------------
   if (loading || locationAllowed === null) return <Loader />;
 
   if (!locationAllowed) return <LocationPermissionPage />;

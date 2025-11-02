@@ -51,18 +51,16 @@ const LocationPermissionPage = ({ setLocationAllowed }) => {
       setIsChecking(false);
     }
   };
-
+  const interval = setInterval(() => {
+    navigator.permissions.query({ name: "geolocation" }).then((status) => {
+      if (status.state === "granted") {
+        setIsChecking(true);
+        clearInterval(interval); // Stop polling once granted
+      }
+    });
+  }, 1000); // Check every second
   useEffect(() => {
     checkLocation();
-
-    const interval = setInterval(() => {
-      navigator.permissions.query({ name: "geolocation" }).then((status) => {
-        if (status.state === "granted") {
-          checkLocation();
-          clearInterval(interval); // Stop polling once granted
-        }
-      });
-    }, 1000); // Check every second
 
     return () => clearInterval(interval); // Cleanup on unmount
   }, []);

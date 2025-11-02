@@ -4,40 +4,65 @@ import { useState } from "react";
 
 const LocationPermissionPage = ({ setLocationAllowed }) => {
   const [isRequesting, setIsRequesting] = useState(false);
+  const [statusMessage, setStatusMessage] = useState("");
 
-  const requestPermission = () => {
+  const requestSystemLocation = () => {
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setLocationAllowed(true);
+        localStorage.setItem("locationAllowed", "true");
+        setIsRequesting(false);
+        setStatusMessage("");
+      },
+      (error) => {
+        setLocationAllowed(false);
+        localStorage.setItem("locationAllowed", "false");
+        setIsRequesting(false);
+
+        if (error.code === error.PERMISSION_DENIED) {
+          setStatusMessage(
+            "Location access denied. Please enable it and retry."
+          );
+        } else {
+          setStatusMessage("Unable to get location. Please try again.");
+        }
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  };
+
+  const requestPermission = async () => {
     if (!("geolocation" in navigator)) {
-      alert("Geolocation is not supported by your browser.");
+      setStatusMessage("Geolocation is not supported by your browser.");
       return;
     }
 
     setIsRequesting(true);
+    setStatusMessage("Requesting location access...");
 
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setLocationAllowed(true);
-        try {
-          localStorage.setItem("locationAllowed", "true");
-        } catch {}
-        setIsRequesting(false);
-      },
-      (error) => {
-        // Failure or denied
-        setIsRequesting(false);
-        if (error.code === error.PERMISSION_DENIED) {
-          alert(
-            "Location access denied. Please enable it in your browser settings and try again."
-          );
-        } else {
-          alert("Unable to get location. Please try again.");
-        }
-        setLocationAllowed(false);
-        try {
+    try {
+      if ("permissions" in navigator && navigator.permissions.query) {
+        const permissionStatus = await navigator.permissions.query({
+          name: "geolocation",
+        });
+
+        if (permissionStatus.state === "denied") {
+          setIsRequesting(false);
+          setLocationAllowed(false);
           localStorage.setItem("locationAllowed", "false");
-        } catch {}
-      },
-      { enableHighAccuracy: true, timeout: 10000 }
-    );
+          setStatusMessage(
+            "Location access blocked. Enable it in settings and retry."
+          );
+          return;
+        }
+      }
+
+      requestSystemLocation();
+    } catch (err) {
+      console.error("Permission query failed:", err);
+      setIsRequesting(false);
+      setStatusMessage("Something went wrong. Please try again.");
+    }
   };
 
   return (
@@ -66,12 +91,13 @@ const LocationPermissionPage = ({ setLocationAllowed }) => {
       >
         Location Access Required
       </h2>
+
       <p
         className="text-base mb-6 max-w-md"
         style={{ color: "var(--color-text-muted)" }}
       >
-        We need your location to mark attendance accurately. Tap below to allow
-        location access.
+        We need your location to mark attendance accurately. Please allow access
+        below.
       </p>
 
       <button
@@ -89,8 +115,12 @@ const LocationPermissionPage = ({ setLocationAllowed }) => {
           (e.currentTarget.style.backgroundColor = "var(--color-primary)")
         }
       >
-        {isRequesting ? "Requesting" : "Allow Location"}
+        {isRequesting ? "Requesting..." : "Allow Location"}
       </button>
+
+      {statusMessage && (
+        <p className="text-sm mt-4 text-red-500 max-w-sm">{statusMessage}</p>
+      )}
     </div>
   );
 };

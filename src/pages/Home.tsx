@@ -151,7 +151,7 @@ export default function Home() {
             />
           </div>
 
-          {message && <MessageBanner message={message} />}
+          {message && !isDayCompleted && <MessageBanner message={message} />}
         </motion.div>
 
         <AttendanceMainContent punches={punches} />

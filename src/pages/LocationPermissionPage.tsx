@@ -9,49 +9,46 @@ const LocationPermissionPage = () => {
 
   return (
     <div
-      className="flex flex-col items-center justify-center h-screen px-6 text-justify overflow-hidden"
+      className="flex flex-col justify-between h-screen text-center px-6"
       style={{ backgroundColor: "var(--color-bg)" }}
     >
-      <img
-        src={logo}
-        alt="CodeHR Logo"
-        className="w-full h-28 mb-6 object-contain"
-      />
+      {/* Center content */}
+      <div className="flex flex-col items-center justify-center grow">
+        <img
+          src={logo}
+          alt="CodeHR Logo"
+          className="w-full h-16 mb-4 object-contain"
+        />
 
-      <h1
-        className="text-3xl font-bold mb-2 tracking-tight"
-        style={{ color: "var(--color-secondary)" }}
-      >
-        Welcome to CodeHR
-      </h1>
+        <h1
+          className="text-3xl font-bold tracking-tight mb-2"
+          style={{ color: "var(--color-secondary)" }}
+        >
+          CodeHR
+        </h1>
 
+        <h2
+          className="text-xl font-medium mb-4"
+          style={{ color: "var(--color-text)" }}
+        >
+          Enable Location Access
+        </h2>
+
+        <p
+          className="text-sm max-w-xs leading-relaxed"
+          style={{ color: "var(--color-text-muted)" }}
+        >
+          Please allow your device’s location to continue. This helps verify
+          your work location securely.
+        </p>
+      </div>
+
+      {/* Bottom privacy note */}
       <p
-        className="text-base mb-4 max-w-md"
-        style={{ color: "var(--color-text)" }}
-      >
-        To continue, please enable your device’s{" "}
-        <strong>location access</strong>. This helps us verify your work
-        location securely.
-      </p>
-
-      <ul
-        className="text-sm mb-6 text-left list-disc pl-6 max-w-sm"
+        className="text-xs italic mb-4"
         style={{ color: "var(--color-text-muted)" }}
       >
-        <li>Click “Allow” when prompted by your browser.</li>
-        <li>Ensure GPS or location services are turned on.</li>
-        <li>If blocked, check site permissions in your browser settings.</li>
-      </ul>
-
-      <p
-        className="text-sm mb-4 italic"
-        style={{ color: "var(--color-text-muted)" }}
-      >
-        Please turn on your location to continue.
-      </p>
-
-      <p className="mt-6 text-xs" style={{ color: "var(--color-text-muted)" }}>
-        We respect your privacy — location data is never shared.
+        We respect your privacy — your location is never shared.
       </p>
     </div>
   );

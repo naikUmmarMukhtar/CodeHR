@@ -11,7 +11,7 @@ export const useLocationPermission = () => {
   };
 
   useEffect(() => {
-    checkLocation(); // Trigger system popup
+    checkLocation();
 
     const interval = setInterval(() => {
       navigator.permissions?.query({ name: "geolocation" }).then((result) => {
@@ -21,10 +21,10 @@ export const useLocationPermission = () => {
           setLocationAllowed(false);
         }
       });
-    }, 5000); // Poll every 5 seconds
+    }, 1000); // Poll every 5 seconds
 
     return () => clearInterval(interval);
   }, []);
 
-  return { locationAllowed, retryLocationCheck: checkLocation };
+  return { locationAllowed, checkLocation };
 };

@@ -73,7 +73,7 @@ function App() {
     const todayStr = today.toISOString().split("T")[0];
     const dayOfWeek = today.getDay();
     if (WEEKEND_DAYS.includes(dayOfWeek) || FIXED_HOLIDAYS.includes(todayStr)) {
-      setIsHoliday(true);
+      // setIsHoliday(true);
     }
 
     const saved = localStorage.getItem("locationAllowed");

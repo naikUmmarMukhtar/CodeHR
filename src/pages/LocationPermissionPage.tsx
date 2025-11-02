@@ -1,13 +1,27 @@
-import logo from "/assets/logo.png"; // 🖼️ Update path if your logo is elsewhere
+import logo from "/assets/logo.png";
 
 const LocationPermissionPage = () => {
   const requestPermission = () => {
-    if ("geolocation" in navigator) {
-      navigator.geolocation.getCurrentPosition(
-        () => window.location.reload(),
-        () => alert("Please enable location access in your browser settings.")
-      );
+    if (!("geolocation" in navigator)) {
+      alert("Geolocation is not supported by your browser.");
+      return;
     }
+
+    navigator.geolocation.getCurrentPosition(
+      () => {
+        window.location.reload();
+      },
+      (error) => {
+        if (error.code === error.PERMISSION_DENIED) {
+          alert(
+            "Location access denied. Please enable it in your browser settings and try again."
+          );
+        } else {
+          alert("Unable to get location. Please try again.");
+        }
+      },
+      { enableHighAccuracy: true }
+    );
   };
 
   return (
@@ -15,7 +29,7 @@ const LocationPermissionPage = () => {
       className="flex flex-col items-center justify-center h-screen text-center p-6"
       style={{ backgroundColor: "var(--color-bg)" }}
     >
-      {/* Logo + Title */}
+      {/* Logo */}
       <div className="flex flex-col items-center mb-8">
         <img
           src={logo}
@@ -30,7 +44,6 @@ const LocationPermissionPage = () => {
         </h1>
       </div>
 
-      {/* Message */}
       <h2
         className="text-2xl font-semibold mb-4"
         style={{ color: "var(--color-text)" }}
@@ -41,11 +54,10 @@ const LocationPermissionPage = () => {
         className="text-base mb-6 max-w-md"
         style={{ color: "var(--color-text-muted)" }}
       >
-        We need your location to provide accurate attendance and shift data.
-        Please allow location access and refresh the page.
+        We need your location to mark attendance accurately. Tap below to allow
+        location access.
       </p>
 
-      {/* Button */}
       <button
         onClick={requestPermission}
         className="px-6 py-3 rounded-xl font-semibold shadow-md transition"

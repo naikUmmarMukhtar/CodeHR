@@ -44,28 +44,43 @@ const LocationPermissionPage = ({ setLocationAllowed }) => {
 
   return (
     <div
-      className="flex flex-col items-center justify-center h-screen text-center px-6"
+      className="flex flex-col items-center justify-center h-screen text-center px-6 text-justify"
       style={{ backgroundColor: "var(--color-bg)" }}
     >
       <img
         src={logo}
         alt="CodeHR Logo"
-        className="w-28 h-28 mb-4 object-contain"
+        className="w-28 h-28 mb-6 object-contain"
       />
+
       <h1
-        className="text-2xl font-bold mb-2"
+        className="text-3xl font-bold mb-2 tracking-tight"
         style={{ color: "var(--color-secondary)" }}
       >
-        CodeHR
+        Welcome to CodeHR
       </h1>
 
-      <p className="text-base mb-4" style={{ color: "var(--color-text)" }}>
-        Turn on your location to continue
+      <p
+        className="text-base mb-4 max-w-md"
+        style={{ color: "var(--color-text)" }}
+      >
+        To continue, please enable your device’s{" "}
+        <strong>location access</strong>. This helps us verify your work
+        location securely.
       </p>
+
+      <ul
+        className="text-sm mb-6 text-left list-disc pl-6 max-w-sm"
+        style={{ color: "var(--color-text-muted)" }}
+      >
+        <li>Click “Allow” when prompted by your browser.</li>
+        <li>Ensure GPS or location services are turned on.</li>
+        <li>If blocked, check site permissions in your browser settings.</li>
+      </ul>
 
       {statusMessage && (
         <p
-          className="text-sm mb-6"
+          className="text-sm mb-6 italic"
           style={{ color: "var(--color-text-muted)" }}
         >
           {statusMessage}
@@ -75,14 +90,18 @@ const LocationPermissionPage = ({ setLocationAllowed }) => {
       <button
         onClick={checkLocation}
         disabled={isChecking}
-        className="px-5 py-2 rounded-lg font-semibold text-sm shadow transition disabled:opacity-60"
+        className="px-6 py-2 rounded-lg font-semibold text-sm shadow-md transition disabled:opacity-60 hover:opacity-90"
         style={{
           backgroundColor: "var(--color-primary)",
           color: "var(--color-bg)",
         }}
       >
-        {isChecking ? "Checking..." : "Retry"}
+        {isChecking ? "Checking..." : "Enable Location"}
       </button>
+
+      <p className="mt-6 text-xs" style={{ color: "var(--color-text-muted)" }}>
+        We respect your privacy — location data is never shared.
+      </p>
     </div>
   );
 };

@@ -20,13 +20,11 @@ function App() {
   const [locationAllowed, setLocationAllowed] = useState<boolean | null>(null);
 
   useEffect(() => {
-    // Auth watcher
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       setLoading(false);
     });
 
-    // Holiday / weekend check
     const today = new Date();
     const todayStr = today.toISOString().split("T")[0];
     const dayOfWeek = today.getDay();
@@ -34,7 +32,6 @@ function App() {
       setIsHoliday(true);
     }
 
-    // Permission check
     const checkLocationPermission = async () => {
       if (!("geolocation" in navigator)) {
         setLocationAllowed(false);
@@ -47,23 +44,19 @@ function App() {
             name: "geolocation" as PermissionName,
           });
 
-          // If already granted -> allow immediately
           if (permission.state === "granted") {
             setLocationAllowed(true);
           } else if (permission.state === "prompt") {
-            // Not granted yet; show permission page (LocationPermissionPage will request)
             setLocationAllowed(false);
           } else {
             setLocationAllowed(false);
           }
 
-          // React to external permission changes (user grants in browser UI)
           permission.onchange = () => {
             const granted = permission.state === "granted";
             setLocationAllowed(granted);
           };
         } else {
-          // Fallback for browsers without permissions API (Safari older)
           navigator.geolocation.getCurrentPosition(
             () => setLocationAllowed(true),
             () => setLocationAllowed(false)
@@ -75,7 +68,6 @@ function App() {
       }
     };
 
-    // Optional: restore last known saved permission (not required but harmless)
     const saved = localStorage.getItem("locationAllowed");
     if (saved !== null) setLocationAllowed(saved === "true");
 
@@ -83,12 +75,9 @@ function App() {
 
     return () => {
       unsubscribe();
-      // permission.onchange is cleaned up by browser when permission object is GC'd,
-      // no extra removal here because we didn't store `permission` in outer scope.
     };
   }, []);
 
-  // Persist the boolean for quicker load next time (optional)
   useEffect(() => {
     if (locationAllowed !== null) {
       try {
@@ -97,14 +86,12 @@ function App() {
     }
   }, [locationAllowed]);
 
-  // Render flow
   if (loading || locationAllowed === null) return <Loader />;
 
-  // Pass setLocationAllowed as prop so LocationPermissionPage can set state directly
   if (!locationAllowed)
     return <LocationPermissionPage setLocationAllowed={setLocationAllowed} />;
 
-  if (!user) return <MobileAuthForm />;
+  if (!user || !user.emailVerified) return <MobileAuthForm />;
 
   // if (isHoliday) return <HolidayPage />;
 

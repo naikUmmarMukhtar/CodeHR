@@ -5,6 +5,7 @@ import {
   signInWithEmailAndPassword,
   updateProfile,
   signOut,
+  sendEmailVerification,
 } from "firebase/auth";
 import { auth } from "../../firebase/config";
 import LoginForm from "./LoginForm";
@@ -60,6 +61,12 @@ export default function AuthForm() {
           email,
           password
         );
+        if (!userCredential.user.emailVerified) {
+          setError("Please verify your email before logging in.");
+          await signOut(auth);
+          setLoading(false);
+          return;
+        }
         showSuccessToast("Login successful.");
       } else {
         const userCredential = await createUserWithEmailAndPassword(
@@ -75,6 +82,11 @@ export default function AuthForm() {
 
         const uid = auth.currentUser?.uid;
         if (!uid) throw new Error("User not authenticated");
+        await sendEmailVerification(user, {
+          url: "https://codehr.netlify.app/",
+        });
+        await signOut(auth);
+        setIsLogin(true);
 
         await postToFirebase(`${uid}/userDetails`, {
           userName: username,
@@ -83,8 +95,10 @@ export default function AuthForm() {
           createdAt: new Date().toISOString(),
         });
 
-        // await signOut(auth);
-        setIsLogin(true);
+        await signOut(auth);
+        setTimeout(() => {
+          setIsLogin(true);
+        }, [2000]);
         setMessage("Account created successfully. Please log in.");
       }
 

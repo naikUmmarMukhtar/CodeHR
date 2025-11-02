@@ -15,7 +15,6 @@ const LocationPermissionPage = ({ setLocationAllowed }) => {
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        // Success: user granted. Directly update App state via prop.
         setLocationAllowed(true);
         try {
           localStorage.setItem("locationAllowed", "true");
@@ -90,7 +89,7 @@ const LocationPermissionPage = ({ setLocationAllowed }) => {
           (e.currentTarget.style.backgroundColor = "var(--color-primary)")
         }
       >
-        {isRequesting ? "Requesting..." : "Allow Location"}
+        {isRequesting ? "Requesting" : "Allow Location"}
       </button>
     </div>
   );

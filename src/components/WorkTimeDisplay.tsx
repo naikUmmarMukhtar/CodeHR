@@ -10,37 +10,17 @@ export default function WorkTimeDisplay({
     <div
       role="status"
       aria-live="polite"
-      className="flex flex-col items-center justify-center w-full mt-6"
-      style={{
-        color: "var(--color-text)",
-      }}
-      title="Work duration for today"
+      title="Today's Work Duration"
+      className="flex flex-col items-center justify-center w-full mt-6 text-(--color-text)"
     >
-      <div className="flex items-center gap-3 mb-2">
-        <Clock4
-          size={24}
-          aria-hidden="true"
-          style={{ color: "var(--color-secondary)" }}
-        />
-        <span
-          className="text-base font-semibold tracking-wide"
-          style={{ color: "var(--color-text-muted)" }}
-        >
-          Work Time
+      <div className="flex items-center gap-2 mb-2">
+        <Clock4 size={20} className="text-(--color-secondary)" />
+        <span className="font-medium text-(--color-text-muted)">
+          Today’s Work Time
         </span>
       </div>
 
-      <div
-        className="px-6 py-3 rounded-lg font-mono text-2xl font-bold shadow-sm"
-        style={{
-          backgroundColor: "var(--color-bg-alt)",
-          color: "var(--color-secondary)",
-          width: "80%",
-          maxWidth: "400px",
-          textAlign: "center",
-          letterSpacing: "0.1em",
-        }}
-      >
+      <div className="px-6 py-3 rounded-lg font-mono text-2xl font-bold shadow-sm bg-(--color-bg-alt) text-(--color-secondary) w-4/5 max-w-sm text-center tracking-widest">
         {workDuration || "00:00:00"}
       </div>
     </div>

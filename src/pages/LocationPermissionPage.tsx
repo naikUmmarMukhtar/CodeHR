@@ -6,8 +6,7 @@ const LocationPermissionPage = ({ setLocationAllowed }) => {
   const [isChecking, setIsChecking] = useState(true);
   const [locationEnabled, setLocationEnabled] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
-
-  const checkLocation = () => {
+  const checkLocation = async () => {
     if (!("geolocation" in navigator)) {
       setStatusMessage("Geolocation is not supported by your browser.");
       setIsChecking(false);
@@ -16,40 +15,76 @@ const LocationPermissionPage = ({ setLocationAllowed }) => {
 
     setIsChecking(true);
 
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setLocationEnabled(true);
-        setLocationAllowed(true);
-        localStorage.setItem("locationAllowed", "true");
-        setIsChecking(false);
-        setStatusMessage("");
-      },
-      () => {
-        setLocationEnabled(false);
-        setLocationAllowed(false);
-        localStorage.setItem("locationAllowed", "false");
-        setIsChecking(false);
-        setStatusMessage("Please turn on your location to continue.");
-      },
-      { enableHighAccuracy: true, timeout: 5000 }
-    );
+    try {
+      const permissionStatus = await navigator.permissions.query({
+        name: "geolocation",
+      });
+
+      if (permissionStatus.state === "granted") {
+        // Already granted — skip prompt and resolve immediately
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            setLocationEnabled(true);
+            setLocationAllowed(true);
+            localStorage.setItem("locationAllowed", "true");
+            setIsChecking(false);
+            setStatusMessage("");
+          },
+          () => {
+            setLocationEnabled(false);
+            setLocationAllowed(false);
+            localStorage.setItem("locationAllowed", "false");
+            setIsChecking(false);
+            setStatusMessage("Unable to retrieve location.");
+          },
+          { enableHighAccuracy: true, timeout: 5000 }
+        );
+      } else {
+        // Not granted yet — prompt user
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            setLocationEnabled(true);
+            setLocationAllowed(true);
+            localStorage.setItem("locationAllowed", "true");
+            setIsChecking(false);
+            setStatusMessage("");
+          },
+          () => {
+            setLocationEnabled(false);
+            setLocationAllowed(false);
+            localStorage.setItem("locationAllowed", "false");
+            setIsChecking(false);
+            setStatusMessage("Please turn on your location to continue.");
+          },
+          { enableHighAccuracy: true, timeout: 5000 }
+        );
+      }
+    } catch (err) {
+      // Fallback if Permissions API fails
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setLocationEnabled(true);
+          setLocationAllowed(true);
+          localStorage.setItem("locationAllowed", "true");
+          setIsChecking(false);
+          setStatusMessage("");
+        },
+        () => {
+          setLocationEnabled(false);
+          setLocationAllowed(false);
+          localStorage.setItem("locationAllowed", "false");
+          setIsChecking(false);
+          setStatusMessage("Please turn on your location to continue.");
+        },
+        { enableHighAccuracy: true, timeout: 5000 }
+      );
+    }
   };
 
   useEffect(() => {
     checkLocation();
   }, []);
-  const onRetry = () => {
-    if (!("geolocation" in navigator)) {
-      setStatusMessage("Geolocation is not supported by your browser.");
-      setIsChecking(false);
-      return;
-    }
-    if ("geolocation" in navigator) {
-      setStatusMessage("Geolocation is not supported by your browser.");
-      setIsChecking(true);
-      return;
-    }
-  };
+
   if (locationEnabled) return null;
 
   return (
@@ -96,7 +131,7 @@ const LocationPermissionPage = ({ setLocationAllowed }) => {
       </p>
 
       <button
-        onClick={onRetry}
+        onClick={checkLocation}
         disabled={isChecking}
         className="px-6 py-2 rounded-lg font-semibold text-sm transition disabled:opacity-60 hover:opacity-90"
         style={{

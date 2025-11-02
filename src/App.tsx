@@ -17,20 +17,20 @@ import { useDeviceCheck } from "./hooks/useDeviceCheck";
 function App() {
   const { user, loading } = useAuth();
   const isHoliday = useHolidayCheck();
-  const { locationAllowed, setLocationAllowed } = useLocationPermission();
+  const { locationAllowed } = useLocationPermission();
   const isMobileDevice = useDeviceCheck();
 
-  if (loading || locationAllowed === null || isMobileDevice === null)
-    return <Loader />;
+  const isReady =
+    !loading && locationAllowed !== null && isMobileDevice !== null;
+
+  if (!isReady) return <Loader />;
 
   // if (!isMobileDevice) return <MobileOnlyPage />;
+  // if (isHoliday) return <HolidayPage />;
 
-  if (!locationAllowed)
-    return <LocationPermissionPage setLocationAllowed={setLocationAllowed} />;
+  if (!locationAllowed) return <LocationPermissionPage />;
 
   if (!user || !user.emailVerified) return <MobileAuthForm />;
-
-  // if (isHoliday) return <HolidayPage />;
 
   return (
     <>

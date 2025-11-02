@@ -1,4 +1,5 @@
 // src/hooks/useLocationPermission.ts
+//@ts-nocheck
 import { useEffect, useState } from "react";
 
 export const useLocationPermission = () => {

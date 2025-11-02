@@ -56,6 +56,7 @@ const LocationPermissionPage = ({ setLocationAllowed }) => {
   const interval = setInterval(() => {
     if (locationAllowed) {
       setLocationEnabled(true);
+      setLocationAllowed(true);
     }
   }, 1000); // Check every second
   useEffect(() => {

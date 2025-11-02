@@ -19,6 +19,7 @@ function App() {
   const isHoliday = useHolidayCheck();
   const { locationAllowed } = useLocationPermission();
   const isMobileDevice = useDeviceCheck();
+  console.log(locationAllowed, "locationAllowed");
 
   const isReady =
     !loading && locationAllowed !== null && isMobileDevice !== null;

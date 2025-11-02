@@ -15,7 +15,6 @@ const LocationPermissionPage = ({ setLocationAllowed }) => {
     }
 
     setIsChecking(true);
-    setStatusMessage("Checking location...");
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
@@ -40,17 +39,17 @@ const LocationPermissionPage = ({ setLocationAllowed }) => {
     checkLocation();
   }, []);
 
-  if (locationEnabled) return null; // parent App will redirect to home
+  if (locationEnabled) return null;
 
   return (
     <div
-      className="flex flex-col items-center justify-center h-screen  px-6 text-justify"
+      className="flex flex-col items-center justify-center h-screen  px-6 text-justify overflow-hidden"
       style={{ backgroundColor: "var(--color-bg)" }}
     >
       <img
         src={logo}
         alt="CodeHR Logo"
-        className="w-28 h-28 mb-6 object-contain"
+        className="w-full h-28 mb-6 object-contain"
       />
 
       <h1
@@ -78,19 +77,17 @@ const LocationPermissionPage = ({ setLocationAllowed }) => {
         <li>If blocked, check site permissions in your browser settings.</li>
       </ul>
 
-      {statusMessage && (
-        <p
-          className="text-sm mb-6 italic"
-          style={{ color: "var(--color-text-muted)" }}
-        >
-          {statusMessage}
-        </p>
-      )}
+      <p
+        className="text-sm mb-4 italic"
+        style={{ color: "var(--color-text-muted)" }}
+      >
+        Please turn on your location to continue.
+      </p>
 
       <button
         onClick={checkLocation}
         disabled={isChecking}
-        className="px-6 py-2 rounded-lg font-semibold text-sm shadow-md transition disabled:opacity-60 hover:opacity-90"
+        className="px-6 py-2 rounded-lg font-semibold text-sm transition disabled:opacity-60 hover:opacity-90"
         style={{
           backgroundColor: "var(--color-primary)",
           color: "var(--color-bg)",

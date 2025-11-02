@@ -43,8 +43,11 @@ const LocationPermissionPage = ({ setLocationAllowed }) => {
       setStatusMessage("Geolocation is not supported by your browser.");
       setIsChecking(false);
       return;
-    } else {
+    }
+    if ("geolocation" in navigator) {
+      setStatusMessage("Geolocation is not supported by your browser.");
       setIsChecking(true);
+      return;
     }
   };
   if (locationEnabled) return null;

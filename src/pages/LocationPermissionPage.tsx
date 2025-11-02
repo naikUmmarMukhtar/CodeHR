@@ -35,12 +35,20 @@ const LocationPermissionPage = () => {
         </h2>
 
         <p
-          className="text-sm max-w-xs leading-relaxed"
+          className="text-sm max-w-xs leading-relaxed mb-6"
           style={{ color: "var(--color-text-muted)" }}
         >
           Please allow your device’s location to continue. This helps verify
           your work location securely.
         </p>
+
+        {/* ✅ Retry Button */}
+        <button
+          onClick={retryLocationCheck}
+          className="bg-[var(--color-primary)] text-white px-4 py-2 rounded-md text-sm font-medium shadow-md hover:opacity-90 transition"
+        >
+          Enable Location
+        </button>
       </div>
 
       {/* Bottom privacy note */}

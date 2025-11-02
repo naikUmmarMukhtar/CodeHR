@@ -9,20 +9,24 @@ export const useLocationPermission = () => {
       () => setLocationAllowed(false)
     );
   };
-  const interval = setInterval(() => {
-    navigator.permissions?.query({ name: "geolocation" }).then((result) => {
-      if (result.state === "granted") {
-        checkLocation();
-      } else {
-        setLocationAllowed(false);
-      }
-    });
-  }, 1000);
+
   useEffect(() => {
-    checkLocation();
+    checkLocation(); // ✅ Triggers system popup on load
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      navigator.permissions?.query({ name: "geolocation" }).then((result) => {
+        if (result.state === "granted") {
+          checkLocation(); // ✅ Recheck with system API
+        } else {
+          setLocationAllowed(false);
+        }
+      });
+    }, 5000); // ⏱️ Poll every 5 seconds
 
     return () => clearInterval(interval);
   }, []);
 
-  return { locationAllowed, checkLocation };
+  return { locationAllowed, retryLocationCheck: checkLocation };
 };

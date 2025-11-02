@@ -7,7 +7,7 @@ import { auth } from "./firebase/config";
 import Loader from "./components/shared/Loader";
 import Home from "./pages/Home";
 import MobileAuthForm from "./components/auth/AuthForm";
-import HolidayPage from "./pages/HolidayPage";
+// import HolidayPage from "./pages/HolidayPage";
 import LocationPermissionPage from "./pages/LocationPermissionPage";
 import AttendanceHistory from "./pages/AttendanceHistory";
 import MobileNav from "./components/shared/MobileNav";
@@ -16,7 +16,7 @@ import { FIXED_HOLIDAYS, WEEKEND_DAYS } from "./lib/constants";
 function App() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [isHoliday, setIsHoliday] = useState(false);
+  // const [isHoliday, setIsHoliday] = useState(false);
   const [locationAllowed, setLocationAllowed] = useState<boolean | null>(null);
   const [isChecking, setIsChecking] = useState(true);
   const [statusMessage, setStatusMessage] = useState("");

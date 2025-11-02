@@ -1,4 +1,3 @@
-// @ts-nocheck
 import logo from "/assets/logo.png";
 import { useEffect, useState } from "react";
 
@@ -6,6 +5,7 @@ const LocationPermissionPage = ({ setLocationAllowed }) => {
   const [isChecking, setIsChecking] = useState(true);
   const [locationEnabled, setLocationEnabled] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
+
   const checkLocation = async () => {
     if (!("geolocation" in navigator)) {
       setStatusMessage("Geolocation is not supported by your browser.");
@@ -21,9 +21,8 @@ const LocationPermissionPage = ({ setLocationAllowed }) => {
       });
 
       if (permissionStatus.state === "granted") {
-        // Already granted — skip prompt and resolve immediately
         navigator.geolocation.getCurrentPosition(
-          (position) => {
+          () => {
             setLocationEnabled(true);
             setLocationAllowed(true);
             localStorage.setItem("locationAllowed", "true");
@@ -40,56 +39,38 @@ const LocationPermissionPage = ({ setLocationAllowed }) => {
           { enableHighAccuracy: true, timeout: 5000 }
         );
       } else {
-        // Not granted yet — prompt user
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            setLocationEnabled(true);
-            setLocationAllowed(true);
-            localStorage.setItem("locationAllowed", "true");
-            setIsChecking(false);
-            setStatusMessage("");
-          },
-          () => {
-            setLocationEnabled(false);
-            setLocationAllowed(false);
-            localStorage.setItem("locationAllowed", "false");
-            setIsChecking(false);
-            setStatusMessage("Please turn on your location to continue.");
-          },
-          { enableHighAccuracy: true, timeout: 5000 }
-        );
+        setLocationEnabled(false);
+        setLocationAllowed(false);
+        localStorage.setItem("locationAllowed", "false");
+        setIsChecking(false);
+        setStatusMessage("Please turn on your location to continue.");
       }
-    } catch (err) {
-      // Fallback if Permissions API fails
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setLocationEnabled(true);
-          setLocationAllowed(true);
-          localStorage.setItem("locationAllowed", "true");
-          setIsChecking(false);
-          setStatusMessage("");
-        },
-        () => {
-          setLocationEnabled(false);
-          setLocationAllowed(false);
-          localStorage.setItem("locationAllowed", "false");
-          setIsChecking(false);
-          setStatusMessage("Please turn on your location to continue.");
-        },
-        { enableHighAccuracy: true, timeout: 5000 }
-      );
+    } catch {
+      setStatusMessage("Error checking location permission.");
+      setIsChecking(false);
     }
   };
 
   useEffect(() => {
     checkLocation();
+
+    const interval = setInterval(() => {
+      navigator.permissions.query({ name: "geolocation" }).then((status) => {
+        if (status.state === "granted") {
+          checkLocation();
+          clearInterval(interval); // Stop polling once granted
+        }
+      });
+    }, 1000); // Check every second
+
+    return () => clearInterval(interval); // Cleanup on unmount
   }, []);
 
   if (locationEnabled) return null;
 
   return (
     <div
-      className="flex flex-col items-center justify-center h-screen  px-6 text-justify overflow-hidden"
+      className="flex flex-col items-center justify-center h-screen px-6 text-justify overflow-hidden"
       style={{ backgroundColor: "var(--color-bg)" }}
     >
       <img
@@ -127,7 +108,7 @@ const LocationPermissionPage = ({ setLocationAllowed }) => {
         className="text-sm mb-4 italic"
         style={{ color: "var(--color-text-muted)" }}
       >
-        Please turn on your location to continue.
+        {statusMessage || "Please turn on your location to continue."}
       </p>
 
       <button

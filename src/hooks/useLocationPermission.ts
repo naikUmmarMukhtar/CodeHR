@@ -11,19 +11,19 @@ export const useLocationPermission = () => {
   };
 
   useEffect(() => {
-    checkLocation(); // ✅ Triggers system popup on load
+    checkLocation();
   }, []);
-
   useEffect(() => {
-    const interval = setInterval(() => {
-      navigator.permissions?.query({ name: "geolocation" }).then((result) => {
-        if (result.state === "granted") {
-          checkLocation(); // ✅ Recheck with system API
-        } else {
-          setLocationAllowed(false);
-        }
+    const interval = setInterval(async () => {
+      const updated = await navigator.permissions.query({
+        name: "geolocation" as PermissionName,
       });
-    }, 500); // ⏱️ Poll every 5 seconds
+      if (updated.state === "granted") {
+        checkLocation(); // ✅ Recheck with system API
+      } else if (updated.state === "denied") {
+        setLocationAllowed(false); // ❌ Explicitly handle blocked state
+      }
+    }, 1000);
 
     return () => clearInterval(interval);
   }, []);

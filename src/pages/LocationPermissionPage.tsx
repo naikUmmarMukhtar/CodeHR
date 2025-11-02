@@ -9,11 +9,11 @@ const LocationPermissionPage = () => {
 
   return (
     <div
-      className="flex flex-col justify-between h-[95vh] text-center px-6"
+      className="flex flex-col justify-center h-screen text-center px-6"
       style={{ backgroundColor: "var(--color-bg)" }}
     >
       {/* Center content */}
-      <div className="flex flex-col items-center justify-center grow">
+      <div className="flex flex-col items-center justify-center">
         <img
           src={logo}
           alt="CodeHR Logo"
@@ -35,7 +35,7 @@ const LocationPermissionPage = () => {
         </h2>
 
         <p
-          className="text-sm max-w-xs leading-relaxed mb-6"
+          className="text-sm max-w-xs leading-relaxed mb-6 text-justify"
           style={{ color: "var(--color-text-muted)" }}
         >
           Please allow your device’s location to continue. This helps verify
@@ -45,19 +45,19 @@ const LocationPermissionPage = () => {
         {/* ✅ Retry Button */}
         <button
           onClick={retryLocationCheck}
-          className="bg-[var(--color-primary)] text-white px-4 py-2 rounded-md text-sm font-medium shadow-md hover:opacity-90 transition"
+          className="bg-(--color-primary) text-(--color-bg) px-4 py-2 rounded-md text-sm font-medium "
         >
           Enable Location
         </button>
       </div>
 
       {/* Bottom privacy note */}
-      <p
-        className="text-xs italic mb-4"
-        style={{ color: "var(--color-text-muted)" }}
-      >
-        We respect your privacy — your location is never shared.
-      </p>
+
+      {locationAllowed === false && (
+        <p className="text-xs mt-10 text-(--color-primary)">
+          Location access is blocked. Enable it from your browser settings.
+        </p>
+      )}
     </div>
   );
 };

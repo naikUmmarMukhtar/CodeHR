@@ -1,20 +1,49 @@
-// LocationPermissionPage.tsx
-import React from "react";
+// @ts-nocheck
 import logo from "/assets/logo.png";
+import { useEffect, useState } from "react";
 
-interface LocationPermissionPageProps {
-  checkLocation: () => void;
-  isChecking: boolean;
-  statusMessage: string;
-}
+const LocationPermissionPage = ({ setLocationAllowed }) => {
+  const [isChecking, setIsChecking] = useState(true);
+  const [locationEnabled, setLocationEnabled] = useState(false);
+  const [statusMessage, setStatusMessage] = useState("");
 
-const LocationPermissionPage: React.FC<LocationPermissionPageProps> = ({
-  checkLocation,
-  isChecking,
-  statusMessage,
-}) => {
+  const checkLocation = () => {
+    if (!("geolocation" in navigator)) {
+      setStatusMessage("Geolocation is not supported by your browser.");
+      setIsChecking(false);
+      return;
+    }
+
+    setIsChecking(true);
+    setStatusMessage("Checking location...");
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setLocationEnabled(true);
+        setLocationAllowed(true);
+        localStorage.setItem("locationAllowed", "true");
+        setIsChecking(false);
+        setStatusMessage("");
+      },
+      () => {
+        setLocationEnabled(false);
+        setLocationAllowed(false);
+        localStorage.setItem("locationAllowed", "false");
+        setIsChecking(false);
+        setStatusMessage("Please turn on your location to continue.");
+      },
+      { enableHighAccuracy: true, timeout: 5000 }
+    );
+  };
+
+  useEffect(() => {
+    checkLocation();
+  }, []);
+
+  if (locationEnabled) return null; // parent App will redirect to home
+
   return (
-    <main
+    <div
       className="flex flex-col items-center justify-center h-screen text-center px-6"
       style={{ backgroundColor: "var(--color-bg)" }}
     >
@@ -54,7 +83,7 @@ const LocationPermissionPage: React.FC<LocationPermissionPageProps> = ({
       >
         {isChecking ? "Checking..." : "Retry"}
       </button>
-    </main>
+    </div>
   );
 };
 

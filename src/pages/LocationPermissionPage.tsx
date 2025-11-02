@@ -7,7 +7,7 @@ const LocationPermissionPage = ({ setLocationAllowed }) => {
   const [isChecking, setIsChecking] = useState(true);
   const [locationEnabled, setLocationEnabled] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
-  const { locationAllowed, setLocationAllowed } = useLocationPermission();
+  const { locationAllowed } = useLocationPermission();
 
   const checkLocation = async () => {
     if (!("geolocation" in navigator)) {

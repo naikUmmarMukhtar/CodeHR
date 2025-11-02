@@ -5,6 +5,8 @@ export const useLocationPermission = () => {
   const [locationAllowed, setLocationAllowed] = useState<boolean | null>(null);
 
   useEffect(() => {
+    let interval: NodeJS.Timeout;
+
     const checkLocationPermission = async () => {
       if (!("geolocation" in navigator)) {
         setLocationAllowed(false);
@@ -22,10 +24,23 @@ export const useLocationPermission = () => {
 
           setLocationAllowed(permission.state === "granted");
 
+          // Listen for changes
           permission.onchange = () => {
             setLocationAllowed(permission.state === "granted");
           };
+
+          // Poll every second until granted
+          interval = setInterval(async () => {
+            const updated = await navigator.permissions.query({
+              name: "geolocation" as PermissionName,
+            });
+            if (updated.state === "granted") {
+              setLocationAllowed(true);
+              clearInterval(interval);
+            }
+          }, 1000);
         } else {
+          // Fallback if Permissions API is not supported
           navigator.geolocation.getCurrentPosition(
             () => setLocationAllowed(true),
             () => setLocationAllowed(false)
@@ -41,6 +56,10 @@ export const useLocationPermission = () => {
     if (saved !== null) setLocationAllowed(saved === "true");
 
     checkLocationPermission();
+
+    return () => {
+      if (interval) clearInterval(interval);
+    };
   }, []);
 
   useEffect(() => {

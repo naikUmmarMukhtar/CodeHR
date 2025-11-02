@@ -26,8 +26,8 @@ function App() {
 
   if (!isReady) return <Loader />;
 
-  // if (!isMobileDevice) return <MobileOnlyPage />;
-  // if (isHoliday) return <HolidayPage />;
+  if (!isMobileDevice) return <MobileOnlyPage />;
+  if (isHoliday) return <HolidayPage />;
 
   if (!locationAllowed) return <LocationPermissionPage />;
 

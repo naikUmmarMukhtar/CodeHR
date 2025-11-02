@@ -1,4 +1,5 @@
 //@ts-nocheck
+import { useLocationPermission } from "../hooks/useLocationPermission";
 import logo from "/assets/logo.png";
 import { useEffect, useState } from "react";
 
@@ -6,6 +7,7 @@ const LocationPermissionPage = ({ setLocationAllowed }) => {
   const [isChecking, setIsChecking] = useState(true);
   const [locationEnabled, setLocationEnabled] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
+  const { locationAllowed, setLocationAllowed } = useLocationPermission();
 
   const checkLocation = async () => {
     if (!("geolocation" in navigator)) {
@@ -52,16 +54,11 @@ const LocationPermissionPage = ({ setLocationAllowed }) => {
     }
   };
   const interval = setInterval(() => {
-    navigator.permissions.query({ name: "geolocation" }).then((status) => {
-      if (status.state === "granted") {
-        setIsChecking(true);
-        clearInterval(interval); // Stop polling once granted
-      }
-    });
+    if (locationAllowed) {
+      setLocationEnabled(true);
+    }
   }, 1000); // Check every second
   useEffect(() => {
-    checkLocation();
-
     return () => clearInterval(interval); // Cleanup on unmount
   }, []);
 

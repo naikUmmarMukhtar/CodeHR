@@ -23,7 +23,7 @@ export const useLocationPermission = () => {
           setLocationAllowed(false);
         }
       });
-    }, 5000); // ⏱️ Poll every 5 seconds
+    }, 500); // ⏱️ Poll every 5 seconds
 
     return () => clearInterval(interval);
   }, []);

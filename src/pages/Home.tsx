@@ -19,6 +19,7 @@ import { auth } from "../firebase/config";
 import Announcements from "../components/Announcements";
 import Stopwatch from "../components/StopWatch";
 import WorkTimeDisplay from "../components/WorkTimeDisplay";
+import { useDailyReset } from "../hooks/useDailyReset";
 
 export default function Home() {
   const [employeeName, setEmployeeName] = useState<string | null>(null);
@@ -26,12 +27,14 @@ export default function Home() {
   const [punches, setPunches] = useState([]);
   const [message, setMessage] = useState<string | null>(null);
   const [checkInStartTime, setCheckInStartTime] = useState<Date | null>(null);
-  const [isDayCompleted, setIsDayCompleted] = useState(false);
 
   const { isLoading, isInside } = useGeofence(setMessage);
   const { handleCheckIn, handleCheckOut } = useAttendanceActions(setPunches);
   const navigate = useNavigate();
   const uid = auth.currentUser?.uid;
+  const [isDayCompleted, setIsDayCompleted] = useState(false);
+
+  useDailyReset(() => setIsDayCompleted(false));
 
   useEffect(() => {
     const fetchEmployeeDetails = async () => {

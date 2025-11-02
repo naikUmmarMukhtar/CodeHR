@@ -1,126 +1,88 @@
 // @ts-nocheck
 import logo from "/assets/logo.png";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const LocationPermissionPage = ({ setLocationAllowed }) => {
-  const [isRequesting, setIsRequesting] = useState(false);
+  const [isChecking, setIsChecking] = useState(true);
+  const [locationEnabled, setLocationEnabled] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
 
-  const requestSystemLocation = () => {
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setLocationAllowed(true);
-        localStorage.setItem("locationAllowed", "true");
-        setIsRequesting(false);
-        setStatusMessage("");
-      },
-      (error) => {
-        setLocationAllowed(false);
-        localStorage.setItem("locationAllowed", "false");
-        setIsRequesting(false);
-
-        if (error.code === error.PERMISSION_DENIED) {
-          setStatusMessage(
-            "Location access denied. Please enable it and retry."
-          );
-        } else {
-          setStatusMessage("Unable to get location. Please try again.");
-        }
-      },
-      { enableHighAccuracy: true, timeout: 10000 }
-    );
-  };
-
-  const requestPermission = async () => {
+  const checkLocation = () => {
     if (!("geolocation" in navigator)) {
       setStatusMessage("Geolocation is not supported by your browser.");
+      setIsChecking(false);
       return;
     }
 
-    setIsRequesting(true);
-    setStatusMessage("Requesting location access...");
+    setIsChecking(true);
+    setStatusMessage("Checking location...");
 
-    try {
-      if ("permissions" in navigator && navigator.permissions.query) {
-        const permissionStatus = await navigator.permissions.query({
-          name: "geolocation",
-        });
-
-        if (permissionStatus.state === "denied") {
-          setIsRequesting(false);
-          setLocationAllowed(false);
-          localStorage.setItem("locationAllowed", "false");
-          setStatusMessage(
-            "Location access blocked. Enable it in settings and retry."
-          );
-          return;
-        }
-      }
-
-      requestSystemLocation();
-    } catch (err) {
-      console.error("Permission query failed:", err);
-      setIsRequesting(false);
-      setStatusMessage("Something went wrong. Please try again.");
-    }
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setLocationEnabled(true);
+        setLocationAllowed(true);
+        localStorage.setItem("locationAllowed", "true");
+        setIsChecking(false);
+        setStatusMessage("");
+      },
+      () => {
+        setLocationEnabled(false);
+        setLocationAllowed(false);
+        localStorage.setItem("locationAllowed", "false");
+        setIsChecking(false);
+        setStatusMessage("Please turn on your location to continue.");
+      },
+      { enableHighAccuracy: true, timeout: 5000 }
+    );
   };
+
+  useEffect(() => {
+    checkLocation();
+  }, []);
+
+  if (locationEnabled) return null; // parent App will redirect to home
 
   return (
     <div
-      className="flex flex-col items-center justify-center h-screen text-center p-6"
+      className="flex flex-col items-center justify-center h-screen text-center px-6"
       style={{ backgroundColor: "var(--color-bg)" }}
     >
-      {/* Logo + Title */}
-      <div className="flex flex-col items-center mb-8">
-        <img
-          src={logo}
-          alt="CodeHR Logo"
-          className="w-full h-20 mb-3 object-contain"
-        />
-        <h1
-          className="text-3xl font-extrabold tracking-tight"
-          style={{ color: "var(--color-secondary)" }}
-        >
-          CodeHR
-        </h1>
-      </div>
-
-      <h2
-        className="text-2xl font-semibold mb-4"
-        style={{ color: "var(--color-text)" }}
+      <img
+        src={logo}
+        alt="CodeHR Logo"
+        className="w-28 h-28 mb-4 object-contain"
+      />
+      <h1
+        className="text-2xl font-bold mb-2"
+        style={{ color: "var(--color-secondary)" }}
       >
-        Location Access Required
-      </h2>
+        CodeHR
+      </h1>
 
-      <p
-        className="text-base mb-6 max-w-md"
-        style={{ color: "var(--color-text-muted)" }}
-      >
-        We need your location to mark attendance accurately. Please allow access
-        below.
+      <p className="text-base mb-4" style={{ color: "var(--color-text)" }}>
+        Turn on your location to continue
       </p>
 
+      {statusMessage && (
+        <p
+          className="text-sm mb-6"
+          style={{ color: "var(--color-text-muted)" }}
+        >
+          {statusMessage}
+        </p>
+      )}
+
       <button
-        onClick={requestPermission}
-        disabled={isRequesting}
-        className="px-6 py-3 rounded-xl font-semibold shadow-md transition disabled:opacity-60"
+        onClick={checkLocation}
+        disabled={isChecking}
+        className="px-5 py-2 rounded-lg font-semibold text-sm shadow transition disabled:opacity-60"
         style={{
           backgroundColor: "var(--color-primary)",
           color: "var(--color-bg)",
         }}
-        onMouseEnter={(e) =>
-          (e.currentTarget.style.backgroundColor = "var(--color-hover)")
-        }
-        onMouseLeave={(e) =>
-          (e.currentTarget.style.backgroundColor = "var(--color-primary)")
-        }
       >
-        {isRequesting ? "Requesting..." : "Allow Location"}
+        {isChecking ? "Checking..." : "Retry"}
       </button>
-
-      {statusMessage && (
-        <p className="text-sm mt-4 text-red-500 max-w-sm">{statusMessage}</p>
-      )}
     </div>
   );
 };

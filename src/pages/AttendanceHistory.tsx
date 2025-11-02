@@ -59,7 +59,7 @@ export default function AttendanceHistory() {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-64 text-sm text-[var(--color-text-muted)]">
+      <div className="flex justify-center items-center h-64 text-sm text-(--color-text-muted)">
         Loading attendance history...
       </div>
     );
@@ -69,7 +69,7 @@ export default function AttendanceHistory() {
     return (
       <div className="flex flex-col justify-center items-center h-64 text-sm">
         <UserCheck size={28} style={{ color: "var(--color-secondary)" }} />
-        <p className="mt-2 text-[var(--color-text-muted)]">
+        <p className="mt-2 text-(--color-text-muted)">
           No attendance records found.
         </p>
       </div>

@@ -45,6 +45,7 @@ function App() {
 
           if (permission.state === "granted") {
             setLocationAllowed(true);
+            if (granted) window.location.reload();
           } else if (permission.state === "prompt") {
             // Try to verify actual access silently
             navigator.geolocation.getCurrentPosition(

@@ -1,6 +1,7 @@
 // Header.jsx
 //@ts-nocheck
-import { LogOut } from "lucide-react";
+import { Logout, PowerOff } from "@mui/icons-material";
+import { LogOut, Power } from "lucide-react";
 
 export default function Header({ handleLogout }) {
   return (
@@ -51,7 +52,7 @@ export default function Header({ handleLogout }) {
           (e.currentTarget.style.color = "var(--color-primary)")
         }
       >
-        <LogOut size={18} />
+        <Power size={18} />
         Logout
       </button>
     </header>

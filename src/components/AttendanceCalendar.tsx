@@ -3,9 +3,9 @@
 import { useEffect, useState } from "react";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
-import { getFromFirebase } from "../../api/firebaseAPI";
-import { auth } from "../../firebase/config";
 import { Clock } from "lucide-react";
+import { getFromFirebase } from "../api/firebaseAPI";
+import { auth } from "../firebase/config";
 
 export default function AttendanceCalendar() {
   const [attendanceData, setAttendanceData] = useState({});
@@ -61,11 +61,10 @@ export default function AttendanceCalendar() {
       className="p-4  border"
       style={{
         borderColor: "var(--color-border)",
-        boxShadow: "0 2px 6px rgba(0, 0, 0, 0.03)",
       }}
     >
       {/* 📅 Section Title */}
-      <div className="flex items-center justify-between mb-3">
+      {/* <div className="flex items-center justify-between mb-3">
         <h3
           className="text-base font-semibold flex items-center gap-2"
           style={{ color: "var(--color-text)" }}
@@ -73,7 +72,7 @@ export default function AttendanceCalendar() {
           <Clock size={18} style={{ color: "var(--color-primary)" }} />
           <span>Attendance Calendar</span>
         </h3>
-      </div>
+      </div> */}
 
       {/* 🗓️ Calendar */}
       <Calendar

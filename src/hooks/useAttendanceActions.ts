@@ -10,7 +10,6 @@ import { showErrorToast, showSuccessToast } from "../utils/toastMessage";
 import { checkTimeWarnings } from "../utils/timeValidation";
 import { confirmAction } from "../utils/ConfirmDialog";
 
-// 🕒 Helper to calculate time difference in seconds
 const calculateWorkDuration = (checkIn, checkOut) => {
   try {
     const inTime = new Date(`1970-01-01T${convertTo24Hr(checkIn)}Z`);
@@ -22,7 +21,6 @@ const calculateWorkDuration = (checkIn, checkOut) => {
   }
 };
 
-// 🔄 Convert "02:30:00 PM" → "14:30:00"
 const convertTo24Hr = (timeStr) => {
   if (!timeStr) return "00:00:00";
   const [time, modifier] = timeStr.split(" ");
@@ -35,7 +33,6 @@ const convertTo24Hr = (timeStr) => {
   )}:${String(seconds).padStart(2, "0")}`;
 };
 
-// 🧭 Format seconds to HH:MM:SS
 const formatWorkTime = (seconds: number) => {
   const h = Math.floor(seconds / 3600)
     .toString()
@@ -88,43 +85,52 @@ export function useAttendanceActions(setPunches) {
     const today = getTodayKey();
     const timeOnly = getTimeNow();
 
-    if (now.getHours() < CHECKOUT_MIN.hour)
-      return showErrorToast(
-        `Cannot check-out before ${CHECKOUT_MIN.hour}:00 PM.`
+    try {
+      if (now.getHours() < CHECKOUT_MIN.hour) {
+        const confirmEarly = await confirmAction(
+          `It's before ${CHECKOUT_MIN.hour}:00 PM. Checking out early may affect your total work duration. Do you still want to proceed?`
+        );
+        if (!confirmEarly) return;
+      }
+
+      const existingData = await getFromFirebase(
+        `${userId}/attendance/${today}`
       );
+      if (!existingData) {
+        showErrorToast("No check-in found for today.");
+        return;
+      }
 
-    const existingData = await getFromFirebase(`${userId}/attendance/${today}`);
-    if (!existingData) return showErrorToast("No check-in found.");
+      const keys = Object.keys(existingData);
+      const autoKey = keys.find((k) => k.startsWith("-"));
+      const record = autoKey ? existingData[autoKey] : existingData;
 
-    const keys = Object.keys(existingData);
-    const autoKey = keys.find((k) => k.startsWith("-"));
-    const record = autoKey ? existingData[autoKey] : existingData;
+      const checkInTime = record?.checkIn;
+      if (!checkInTime) {
+        showErrorToast("Check-in time not found.");
+        return;
+      }
 
-    const checkInTime = record?.checkIn;
-    if (!checkInTime) return showErrorToast("Check-in time not found.");
+      const totalSeconds = calculateWorkDuration(checkInTime, timeOnly);
+      const formattedDuration = formatWorkTime(totalSeconds);
 
-    const warnings = checkTimeWarnings("Check-out", now);
-    const confirmed = await confirmAction(
-      warnings.length
-        ? `${warnings[0]}\n\nProceed with Check-out?`
-        : "Confirm Check-out?"
-    );
-    if (!confirmed) return;
+      await putToFirebase(`${userId}/attendance/${today}`, {
+        checkIn: checkInTime,
+        checkOut: timeOnly,
+        workDuration: formattedDuration,
+        status: "Present",
+      });
 
-    const totalSeconds = calculateWorkDuration(checkInTime, timeOnly);
-    const formattedDuration = formatWorkTime(totalSeconds);
+      setPunches((prev) => [...prev, { time: timeOnly, type: "Check-out" }]);
 
-    await putToFirebase(`${userId}/attendance/${today}`, {
-      checkIn: checkInTime,
-      checkOut: timeOnly,
-      workDuration: formattedDuration,
-      status: "Present",
-    });
-
-    setPunches((prev) => [...prev, { time: timeOnly, type: "Check-out" }]);
-    showSuccessToast(
-      `Check-out successful! Total work time: ${formattedDuration}`
-    );
+      showSuccessToast("Checked out successfully!");
+    } catch (error) {
+      console.error("Error during check-out:", error);
+      showErrorToast(
+        "Something went wrong during check-out. Please try again."
+      );
+    } finally {
+    }
   };
 
   return { handleCheckIn, handleCheckOut };

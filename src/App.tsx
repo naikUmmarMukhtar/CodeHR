@@ -9,6 +9,8 @@ import MobileAuthForm from "./components/auth/AuthForm";
 import HolidayPage from "./pages/HolidayPage";
 import LocationPermissionPage from "./pages/LocationPermissionPage";
 import { FIXED_HOLIDAYS, WEEKEND_DAYS } from "./lib/constants";
+import AttendanceHistory from "./pages/AttendanceHistory";
+import MobileNav from "./components/shared/MobileNav";
 
 function App() {
   const [user, setUser] = useState<any>(null);
@@ -30,7 +32,6 @@ function App() {
     }
 
     const checkLocationPermission = async () => {
-      // iOS and some browsers may not support permissions API
       if (!("geolocation" in navigator)) {
         setLocationAllowed(false);
         return;
@@ -58,7 +59,6 @@ function App() {
             setLocationAllowed(permission.state === "granted");
           };
         } else {
-          // Safari fallback
           navigator.geolocation.getCurrentPosition(
             () => setLocationAllowed(true),
             () => setLocationAllowed(false)
@@ -70,19 +70,16 @@ function App() {
       }
     };
 
-    // Load from localStorage first (to avoid brief flash)
     const savedPermission = localStorage.getItem("locationAllowed");
     if (savedPermission !== null) {
       setLocationAllowed(savedPermission === "true");
     }
 
-    // Always re-check in the background
     checkLocationPermission();
 
     return () => unsubscribe();
   }, []);
 
-  // Persist location permission state
   useEffect(() => {
     if (locationAllowed !== null) {
       localStorage.setItem("locationAllowed", String(locationAllowed));
@@ -95,14 +92,17 @@ function App() {
 
   if (!user) return <MobileAuthForm />;
 
-  // Optional: Uncomment if you want to show a holiday page
   // if (isHoliday) return <HolidayPage />;
 
   return (
-    <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+    <>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/history" element={<AttendanceHistory />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+      <MobileNav />
+    </>
   );
 }
 

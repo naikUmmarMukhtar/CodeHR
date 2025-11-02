@@ -1,4 +1,4 @@
-export function haversineDistance(
+export function haversineFormulla(
   lat1: number,
   lon1: number,
   lat2: number,

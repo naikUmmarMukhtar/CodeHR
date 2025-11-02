@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { useState, useEffect, useRef, useCallback } from "react";
 import { OFFICE_COORDS, OFFICE_RADIUS_METERS } from "../lib/constants";
-import { haversineDistance } from "../utils/distance";
+import { haversineFormulla } from "../utils/haversineFormulla";
 import { showErrorToast } from "../utils/toastMessage";
 
 export function useGeofence(setMessage) {
@@ -22,7 +22,7 @@ export function useGeofence(setMessage) {
         console.log(latitude, longitude);
         console.log(OFFICE_COORDS.lat, OFFICE_COORDS.lng);
 
-        const distance = haversineDistance(
+        const distance = haversineFormulla(
           latitude,
           longitude,
           OFFICE_COORDS.lat,

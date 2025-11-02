@@ -3,26 +3,26 @@ import { useEffect, useMemo, useState } from "react";
 import { getAuth, signOut } from "firebase/auth";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router";
-import { CalendarDays, Clock, User, Wallet } from "lucide-react";
 import { showErrorToast, showSuccessToast } from "../utils/toastMessage";
-import MobileNav from "../components/dashboard/MobileNav";
+import MobileNav from "../components/shared/MobileNav";
 import ContentWrapper from "../components/shared/ContentWrapper";
 import Header from "../components/shared/Header";
-import PunchButton from "../components/dashboard/PunchButton";
+import PunchButton from "../components/PunchButton";
 import { useGeofence } from "../hooks/useGeoFence";
 import { useAttendanceActions } from "../hooks/useAttendanceActions";
-import EmployeeHeader from "../components/dashboard/EmployeeHeader";
-import StatusSection from "../components/dashboard/StatusSection";
-import MessageBanner from "../components/dashboard/MessageBanner";
-import AttendanceMainContent from "../components/dashboard/AttendanceMainContent";
+import EmployeeHeader from "../components/EmployeeHeader";
+import StatusSection from "../components/StatusSection";
+import MessageBanner from "../components/MessageBanner";
+import AttendanceMainContent from "../components/AttendanceMainContent";
 import { getFromFirebase } from "../api/firebaseAPI";
 import { auth } from "../firebase/config";
-import Announcements from "../components/dashboard/Announcements";
+import Announcements from "../components/Announcements";
 import Stopwatch from "../components/StopWatch";
+import WorkTimeDisplay from "../components/WorkTimeDisplay";
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState("attendance");
   const [employeeName, setEmployeeName] = useState<string | null>(null);
+  const [workTimeDuration, setWorkTimeDuration] = useState<string | null>(null);
   const [punches, setPunches] = useState([]);
   const [message, setMessage] = useState<string | null>(null);
   const [checkInStartTime, setCheckInStartTime] = useState<Date | null>(null);
@@ -89,29 +89,21 @@ export default function Home() {
     restoreTimer();
   }, [uid]);
 
-  const recordPunch = async (todayStatus, setIsLoading, refreshStatus) => {
+  const recordPunch = async (todayStatus, setIsLoading, fetchTodayStatus) => {
     if (!isInside) {
-      showErrorToast("You’re too far from the office.");
+      showErrorToast("Outside Office Area");
       return;
     }
 
-    if (todayStatus === "Completed") {
-      setIsDayCompleted(true);
-    }
-
     setIsLoading(true);
+
     try {
       if (todayStatus === "Check-in") {
         await handleCheckIn();
-        showSuccessToast("Checked in successfully!");
-        setCheckInStartTime(new Date());
       } else if (todayStatus === "Check-out") {
         await handleCheckOut();
-        showSuccessToast("Checked out successfully!");
-        setCheckInStartTime(null);
       }
-
-      await refreshStatus();
+      fetchTodayStatus?.();
     } catch (err) {
       console.error("Punch failed:", err);
       showErrorToast("Something went wrong. Please try again.");
@@ -130,13 +122,6 @@ export default function Home() {
     }
   };
 
-  const navItems = [
-    { id: "attendance", name: "Attendance", icon: <Clock size={18} /> },
-    { id: "profile", name: "Profile", icon: <User size={18} /> },
-    { id: "leave", name: "Leave", icon: <CalendarDays size={18} /> },
-    { id: "salary", name: "Salary", icon: <Wallet size={18} /> },
-  ];
-
   return (
     <ContentWrapper>
       <Header handleLogout={handleLogout} />
@@ -150,16 +135,19 @@ export default function Home() {
           <EmployeeHeader employeeName={employeeName} />
 
           <div className="flex justify-between items-center max-h-fit">
-            <StatusSection
-              status={status}
-              statusColor={statusColor}
-              isInside={isInside}
-            />
+            {isDayCompleted ? (
+              <WorkTimeDisplay workDuration={workTimeDuration} />
+            ) : (
+              <StatusSection
+                status={status}
+                statusColor={statusColor}
+                isInside={isInside}
+              />
+            )}
             <PunchButton
-              nextActionType={nextActionType}
-              isLoading={isLoading}
               recordPunch={recordPunch}
-              isInside={isInside}
+              onDayComplete={setIsDayCompleted}
+              workDuration={setWorkTimeDuration}
             />
           </div>
 
@@ -169,12 +157,6 @@ export default function Home() {
         <AttendanceMainContent punches={punches} />
         <Announcements />
       </div>
-
-      <MobileNav
-        items={navItems}
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-      />
     </ContentWrapper>
   );
 }

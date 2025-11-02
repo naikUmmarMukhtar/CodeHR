@@ -25,6 +25,7 @@ function App() {
       setLoading(false);
     });
 
+    // ✅ Check if today is a weekend or holiday
     const today = new Date();
     const todayStr = today.toISOString().split("T")[0];
     const dayOfWeek = today.getDay();
@@ -32,6 +33,7 @@ function App() {
       setIsHoliday(true);
     }
 
+    // ✅ Check geolocation permission once
     const checkLocationPermission = async () => {
       if (!("geolocation" in navigator)) {
         setLocationAllowed(false);
@@ -44,19 +46,14 @@ function App() {
             name: "geolocation" as PermissionName,
           });
 
-          if (permission.state === "granted") {
-            setLocationAllowed(true);
-          } else if (permission.state === "prompt") {
-            setLocationAllowed(false);
-          } else {
-            setLocationAllowed(false);
-          }
+          setLocationAllowed(permission.state === "granted");
 
+          // ✅ Reactively handle changes
           permission.onchange = () => {
-            const granted = permission.state === "granted";
-            setLocationAllowed(granted);
+            setLocationAllowed(permission.state === "granted");
           };
         } else {
+          // Fallback for older browsers
           navigator.geolocation.getCurrentPosition(
             () => setLocationAllowed(true),
             () => setLocationAllowed(false)
@@ -68,30 +65,32 @@ function App() {
       }
     };
 
+    // ✅ Load previous permission state
     const saved = localStorage.getItem("locationAllowed");
     if (saved !== null) setLocationAllowed(saved === "true");
 
     checkLocationPermission();
 
-    return () => {
-      unsubscribe();
-    };
+    return () => unsubscribe();
   }, []);
 
+  // ✅ Persist permission state
   useEffect(() => {
     if (locationAllowed !== null) {
-      try {
-        localStorage.setItem("locationAllowed", String(locationAllowed));
-      } catch {}
+      localStorage.setItem("locationAllowed", String(locationAllowed));
     }
   }, [locationAllowed]);
 
+  // ✅ Handle loading and permission checks
   if (loading || locationAllowed === null) return <Loader />;
 
-  if (!locationAllowed)
+  if (!locationAllowed) {
     return <LocationPermissionPage setLocationAllowed={setLocationAllowed} />;
+  }
 
-  if (!user || !user.emailVerified) return <MobileAuthForm />;
+  if (!user || !user.emailVerified) {
+    return <MobileAuthForm />;
+  }
 
   // if (isHoliday) return <HolidayPage />;
 

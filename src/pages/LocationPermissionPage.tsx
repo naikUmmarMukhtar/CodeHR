@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 
 const LocationPermissionPage = ({ setLocationAllowed }) => {
   const [isChecking, setIsChecking] = useState(true);
-  const [locationEnabled, setLocationEnabled] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
 
   const checkLocation = () => {
@@ -18,15 +17,13 @@ const LocationPermissionPage = ({ setLocationAllowed }) => {
     setStatusMessage("Checking location...");
 
     navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setLocationEnabled(true);
-        setLocationAllowed(true);
+      () => {
+        setLocationAllowed(true); // 👈 App will automatically switch to Home
         localStorage.setItem("locationAllowed", "true");
         setIsChecking(false);
         setStatusMessage("");
       },
       () => {
-        setLocationEnabled(false);
         setLocationAllowed(false);
         localStorage.setItem("locationAllowed", "false");
         setIsChecking(false);
@@ -38,9 +35,19 @@ const LocationPermissionPage = ({ setLocationAllowed }) => {
 
   useEffect(() => {
     checkLocation();
-  }, []);
 
-  if (locationEnabled) return null; // parent App will redirect to home
+    // ✅ Recheck automatically when user changes system settings
+    if ("permissions" in navigator && navigator.permissions.query) {
+      navigator.permissions.query({ name: "geolocation" }).then((perm) => {
+        perm.onchange = () => {
+          if (perm.state === "granted") {
+            setLocationAllowed(true);
+            localStorage.setItem("locationAllowed", "true");
+          }
+        };
+      });
+    }
+  }, []);
 
   return (
     <div

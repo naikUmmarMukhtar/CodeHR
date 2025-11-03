@@ -20,6 +20,7 @@ import Announcements from "../components/Announcements";
 import Stopwatch from "../components/StopWatch";
 import WorkTimeDisplay from "../components/WorkTimeDisplay";
 import { useDailyReset } from "../hooks/useDailyReset";
+import { useLocationPermission } from "../hooks/useLocationPermission";
 
 export default function Home() {
   const [employeeName, setEmployeeName] = useState<string | null>(null);
@@ -33,8 +34,9 @@ export default function Home() {
   const navigate = useNavigate();
   const uid = auth.currentUser?.uid;
   const [isDayCompleted, setIsDayCompleted] = useState(false);
+  const { locationAllowed } = useLocationPermission();
 
-  useDailyReset(() => setIsDayCompleted(false));
+  // useDailyReset(() => setIsDayCompleted(false));
 
   useEffect(() => {
     const fetchEmployeeDetails = async () => {
@@ -93,6 +95,10 @@ export default function Home() {
   }, [uid]);
 
   const recordPunch = async (todayStatus, setIsLoading, fetchTodayStatus) => {
+    if (!locationAllowed) {
+      showErrorToast("Turn On Location First");
+      return;
+    }
     if (!isInside) {
       showErrorToast("Outside Office Area");
       return;

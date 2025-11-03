@@ -25,7 +25,7 @@ function App() {
   // if (!isMobileDevice) return <MobileOnlyPage />;
   // if (isHoliday) return <HolidayPage />;
 
-  if (!locationAllowed) return <LocationPermissionPage />;
+  // if (!locationAllowed) return <LocationPermissionPage />;
 
   if (!user || !user.emailVerified) return <MobileAuthForm />;
 

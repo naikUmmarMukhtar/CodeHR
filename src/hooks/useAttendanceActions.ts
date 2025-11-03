@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { getAuth } from "firebase/auth";
-import { CHECKIN_START, CHECKOUT_MIN } from "../lib/constants";
+import { CHECKIN_END, CHECKIN_START, CHECKOUT_MIN } from "../lib/constants";
 import {
   getFromFirebase,
   postToFirebase,
@@ -65,6 +65,18 @@ export function useAttendanceActions(setPunches) {
     const timeOnly = getTimeNow();
 
     try {
+      // ⚠️ Warn if check-in is after 10:15 AM
+      if (
+        now.getHours() > CHECKIN_END.hour ||
+        (now.getHours() === CHECKIN_END.hour &&
+          now.getMinutes() > CHECKIN_END.minute)
+      ) {
+        const confirmLate = await confirmAction(
+          `It's after 10:15 AM. This will be recorded as a late check-in. Do you still want to proceed?`
+        );
+        if (!confirmLate) return;
+      }
+
       await postToFirebase(`${userId}/attendance/${today}`, {
         checkIn: timeOnly,
         checkOut: "",
@@ -88,7 +100,7 @@ export function useAttendanceActions(setPunches) {
     try {
       if (now.getHours() < CHECKOUT_MIN.hour) {
         const confirmEarly = await confirmAction(
-          `It's before ${CHECKOUT_MIN.hour}:00 PM. Checking out early may affect your total work duration. Do you still want to proceed?`
+          `It's before 5:00 PM. Checking out early may affect your total work duration. Do you still want to proceed?`
         );
         if (!confirmEarly) return;
       }

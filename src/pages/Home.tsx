@@ -36,7 +36,7 @@ export default function Home() {
   const [isDayCompleted, setIsDayCompleted] = useState(false);
   const { locationAllowed } = useLocationPermission();
 
-  // useDailyReset(() => setIsDayCompleted(false));
+  useDailyReset(() => setIsDayCompleted(false));
 
   useEffect(() => {
     const fetchEmployeeDetails = async () => {
@@ -96,7 +96,7 @@ export default function Home() {
 
   const recordPunch = async (todayStatus, setIsLoading, fetchTodayStatus) => {
     if (!locationAllowed) {
-      showErrorToast("Turn On Location First");
+      showErrorToast("Turn on location...");
       return;
     }
     if (!isInside) {

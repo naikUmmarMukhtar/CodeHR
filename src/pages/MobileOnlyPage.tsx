@@ -8,7 +8,7 @@ export default function MobileOnlyPage() {
       <img
         src="https://static.vecteezy.com/system/resources/previews/007/283/994/non_2x/blocked-web-page-website-icon-vector.jpg"
         alt="Mobile only access illustration"
-        className="w-full h-auto object-contain rounded-xl"
+        className="w-80 h-auto object-contain rounded-xl"
       />
 
       <h1 className="text-lg font-semibold">Mobile Access Only</h1>

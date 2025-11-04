@@ -1,5 +1,4 @@
 // @ts-nocheck
-//
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { auth } from "../firebase/config";
@@ -28,22 +27,34 @@ export default function ProfilePage() {
   const userEmail = auth.currentUser?.email;
 
   useEffect(() => {
-    const fetchEmployeeDetails = async () => {
+    const fetchProfile = async () => {
       if (!uid) return;
+      setIsLoading(true);
       try {
-        const details = await getFromFirebase(`${uid}/userDetails`);
-        const employeeRecord = details ? Object.values(details)[0] : null;
-        if (employeeRecord?.userName) setEmployeeName(employeeRecord.userName);
-        else if (employeeRecord?.displayName)
-          setEmployeeName(employeeRecord.displayName);
-        else if (employeeRecord?.email)
-          setEmployeeName(employeeRecord.email.split("@")[0]);
+        const data = await getFromFirebase(`${uid}/userDetails`);
+        console.log("Fetched data:", data);
+
+        // Get first child object (Firebase pushes generate random keys)
+        const firstKey = Object.keys(data || {})[0];
+        const userData = data?.[firstKey] || {};
+
+        setProfile({
+          name: userData.userName || "User Name",
+          email: userData.email || userEmail || "example@mail.com",
+          phone: userData.phone || "Not provided",
+          address: userData.department || "Software Engineer",
+          memberSince: userData.memberSince || "05-September-2025",
+          status: userData.status || "Active Member",
+        });
       } catch (error) {
-        console.error("Error fetching employee details:", error);
+        console.error("Error loading profile:", error);
+      } finally {
+        setIsLoading(false);
       }
     };
-    fetchEmployeeDetails();
-  }, [uid]);
+
+    fetchProfile();
+  }, [uid, userEmail]);
 
   if (isLoading) {
     return (
@@ -93,7 +104,6 @@ export default function ProfilePage() {
         >
           {profile.name}
         </h2>
-
         <p className="text-sm flex justify-center items-center gap-1 text-(--color-text-muted)">
           <MapPin size={14} />
           {profile.address}
@@ -189,8 +199,7 @@ export default function ProfilePage() {
         CodeHR v1.0.1
         <br />
         <span className="flex justify-center items-center gap-1 mt-1">
-          Made with <span className="text-var(--color-primary)">❤️</span> for
-          CodeStrix Staff
+          Made with <span className="text-red-500">❤️</span> for CodeStrix Staff
         </span>
       </div>
     </div>

@@ -27,28 +27,22 @@ export default function ProfilePage() {
   const userEmail = auth.currentUser?.email;
 
   useEffect(() => {
-    const fetchProfile = async () => {
+    const fetchEmployeeDetails = async () => {
       if (!uid) return;
-      setIsLoading(true);
       try {
-        const data = await getFromFirebase(`${uid}/profile`);
-        setProfile({
-          name: data?.name || "User Name",
-          email: data?.email || userEmail || "example@mail.com",
-          phone: data?.phone || "Not provided",
-          address: data?.department || "Software Engineer",
-          memberSince: data?.memberSince || "05-September-2025",
-          status: data?.status || "Active Member",
-        });
+        const details = await getFromFirebase(`${uid}/userDetails`);
+        const employeeRecord = details ? Object.values(details)[0] : null;
+        if (employeeRecord?.userName) setEmployeeName(employeeRecord.userName);
+        else if (employeeRecord?.displayName)
+          setEmployeeName(employeeRecord.displayName);
+        else if (employeeRecord?.email)
+          setEmployeeName(employeeRecord.email.split("@")[0]);
       } catch (error) {
-        console.error("Error loading profile:", error);
-      } finally {
-        setIsLoading(false);
+        console.error("Error fetching employee details:", error);
       }
     };
-
-    fetchProfile();
-  }, [uid, userEmail]);
+    fetchEmployeeDetails();
+  }, [uid]);
 
   if (isLoading) {
     return (
@@ -92,9 +86,13 @@ export default function ProfilePage() {
           </button>
         </div>
 
-        <h2 className="mt-3 text-lg font-semibold uppercase tracking-wide">
+        <h2
+          className="mt-3 text-lg font-semibold uppercase tracking-wide max-w-[220px] truncate mx-auto"
+          title={profile.name}
+        >
           {profile.name}
         </h2>
+
         <p className="text-sm flex justify-center items-center gap-1 text-(--color-text-muted)">
           <MapPin size={14} />
           {profile.address}
@@ -190,7 +188,8 @@ export default function ProfilePage() {
         CodeHR v1.0.1
         <br />
         <span className="flex justify-center items-center gap-1 mt-1">
-          Made with <span className="text-red-500">❤️</span> for CodeStrix Staff
+          Made with <span className="text-var(--color-primary)">❤️</span> for
+          CodeStrix Staff
         </span>
       </div>
     </div>

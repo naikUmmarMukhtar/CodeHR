@@ -1,4 +1,5 @@
 @import "tailwindcss";
+
 body {
   margin: 0;
   padding: 0;
@@ -6,10 +7,14 @@ body {
 * {
   box-sizing: border-box;
 }
+
 :root {
-  --color-primary: #ff5a5f; /* Airbnb Coral */
-  --color-secondary: #00a699; /* Airbnb Green */
-  --color-accent: #fc642d; /* Airbnb Orange */
+  --color-primary: #ff5a5f; /* Coral - Absent */
+  --color-secondary: #00a699; /* Green - Present */
+  --color-accent: #fc642d; /* Orange - Accent for UI highlights */
+
+  --color-leave: #9b59b6; /* Purple - Leave main color */
+  --color-leave-bg: #f4e9f9; /* Light purple tint for leave background */
 
   --color-bg: #ffffff; /* White */
   --color-bg-alt: #f7f7f7; /* Light Grey */
@@ -20,33 +25,36 @@ body {
   --color-border: #ebebeb; /* Light Border */
   --color-hover: #ff7e82; /* Coral Hover */
 }
+
 .simple-calendar {
   width: 100%;
   background: var(--color-bg);
   border: none !important;
   font-size: 14px;
-
   color: var(--color-text);
 }
 
-/* For Present Days */
 .calendar-present {
-  background-color: rgba(0, 166, 153, 0.15) !important; /* light green tint */
-  color: var(--color-secondary) !important; /* Airbnb Green */
+  background-color: var(--color-secondary) !important;
+  color: var(--color-bg) !important;
   font-weight: bold;
 }
 
-/* For Absent Days */
 .calendar-absent {
-  background-color: rgba(255, 90, 95, 0.15) !important; /* light coral tint */
-  color: var(--color-primary) !important; /* Airbnb Coral */
+  background-color: var(--color-primary) !important;
+  color: var(--color-bg) !important;
   font-weight: bold;
 }
 
-/* For Weekends (optional neutrality) */
+.calendar-leave {
+  background-color: var(--color-leave) !important;
+  color: var(--color-bg) !important;
+  font-weight: bold;
+  box-shadow: 0 0 4px var(--color-leave-bg);
+}
+
 .calendar-weekend {
   border-radius: 0px !important;
-
   background-color: var(--color-bg-alt) !important;
   color: var(--color-text-muted) !important;
 }

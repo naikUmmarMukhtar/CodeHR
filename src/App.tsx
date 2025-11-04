@@ -13,6 +13,8 @@ import { useAuth } from "./hooks/useAuth";
 import { useHolidayCheck } from "./hooks/useHolidayCheck";
 import { useLocationPermission } from "./hooks/useLocationPermission";
 import { useDeviceCheck } from "./hooks/useDeviceCheck";
+import LeaveHistory from "./pages/LeaveHistory";
+import ProfilePage from "./pages/ProfilePage";
 
 function App() {
   const { user, loading } = useAuth();
@@ -34,6 +36,8 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/history" element={<AttendanceHistory />} />
+        <Route path="/leave-history" element={<LeaveHistory />} />
+        <Route path="/profile" element={<ProfilePage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       <MobileNav />

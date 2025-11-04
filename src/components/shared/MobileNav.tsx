@@ -7,7 +7,7 @@ export default function MobileNav() {
   const navItems = [
     { id: "", name: "Attendance", icon: <Clock size={18} /> },
     { id: "profile", name: "Profile", icon: <User size={18} /> },
-    { id: "leave", name: "Leave", icon: <CalendarDays size={18} /> },
+    { id: "leave-history", name: "Leave", icon: <CalendarDays size={18} /> },
     { id: "history", name: "History", icon: <History size={18} /> },
   ];
 

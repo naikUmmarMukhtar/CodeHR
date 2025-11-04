@@ -36,7 +36,7 @@ export default function Home() {
   const [isDayCompleted, setIsDayCompleted] = useState(false);
   const { locationAllowed } = useLocationPermission();
 
-  useDailyReset(() => setIsDayCompleted(false));
+  // useDailyReset(() => setIsDayCompleted(false));
 
   useEffect(() => {
     const fetchEmployeeDetails = async () => {
@@ -67,32 +67,32 @@ export default function Home() {
     ? "var(--color-secondary)"
     : "var(--color-accent)";
 
-  const convertTo24Hr = (timeStr) => {
-    if (!timeStr) return "00:00:00";
-    const [time, modifier] = timeStr.split(" ");
-    let [hours, minutes, seconds] = time.split(":").map(Number);
-    if (modifier === "PM" && hours !== 12) hours += 12;
-    if (modifier === "AM" && hours === 12) hours = 0;
-    return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(
-      2,
-      "0"
-    )}:${String(seconds).padStart(2, "0")}`;
-  };
+  // const convertTo24Hr = (timeStr) => {
+  //   if (!timeStr) return "00:00:00";
+  //   const [time, modifier] = timeStr.split(" ");
+  //   let [hours, minutes, seconds] = time.split(":").map(Number);
+  //   if (modifier === "PM" && hours !== 12) hours += 12;
+  //   if (modifier === "AM" && hours === 12) hours = 0;
+  //   return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(
+  //     2,
+  //     "0"
+  //   )}:${String(seconds).padStart(2, "0")}`;
+  // };
 
-  useEffect(() => {
-    const restoreTimer = async () => {
-      if (!uid) return;
-      const todayKey = new Date().toLocaleDateString("en-CA");
-      const record = await getFromFirebase(`${uid}/attendance/${todayKey}`);
-      if (!record) return;
-      const entry = Object.values(record)[0] || record;
-      if (entry.checkIn && !entry.checkOut) {
-        const inTime = new Date(`1970-01-01T${convertTo24Hr(entry.checkIn)}Z`);
-        setCheckInStartTime(inTime);
-      }
-    };
-    restoreTimer();
-  }, [uid]);
+  // useEffect(() => {
+  //   const restoreTimer = async () => {
+  //     if (!uid) return;
+  //     const todayKey = new Date().toLocaleDateString("en-CA");
+  //     const record = await getFromFirebase(`${uid}/attendance/${todayKey}`);
+  //     if (!record) return;
+  //     const entry = Object.values(record)[0] || record;
+  //     if (entry.checkIn && !entry.checkOut) {
+  //       const inTime = new Date(`1970-01-01T${convertTo24Hr(entry.checkIn)}Z`);
+  //       setCheckInStartTime(inTime);
+  //     }
+  //   };
+  //   restoreTimer();
+  // }, [uid]);
 
   const recordPunch = async (todayStatus, setIsLoading, fetchTodayStatus) => {
     if (!locationAllowed) {

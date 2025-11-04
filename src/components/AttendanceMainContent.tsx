@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { Clock } from "lucide-react";
 import AttendanceCalendar from "./AttendanceCalendar";
 
-export default function AttendanceMainContent({ punches }) {
+export default function AttendanceMainContent({}) {
   return (
     <motion.div
       className="lg:col-span-2 space-y-6"
@@ -11,7 +11,7 @@ export default function AttendanceMainContent({ punches }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.15, duration: 0.5 }}
     >
-      <AttendanceCalendar punches={punches} />
+      <AttendanceCalendar />
     </motion.div>
   );
 }

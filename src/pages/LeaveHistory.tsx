@@ -11,7 +11,7 @@ import {
   Timer,
   ClockPlus,
 } from "lucide-react";
-import { showErrorToast } from "../utils/toastMessage";
+import { showErrorToast, showSuccessToast } from "../utils/toastMessage";
 
 export default function LeaveHistory() {
   const [leaves, setLeaves] = useState([]);
@@ -74,13 +74,13 @@ export default function LeaveHistory() {
       };
 
       await putToFirebase(`${uid}/attendance/${today}`, leaveData);
-      alert("Leave applied successfully!");
+      showSuccessToast("Leave applied successfully!");
 
       setLeaves((prev) => [{ date: today, ...leaveData }, ...prev]);
       setReason("");
     } catch (error) {
       console.error("Error applying leave:", error);
-      alert("Failed to apply leave. Try again.");
+      showErrorToast("Failed to apply leave. Try again.");
     } finally {
       setIsSubmitting(false);
     }

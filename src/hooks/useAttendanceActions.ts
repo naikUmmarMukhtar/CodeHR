@@ -46,7 +46,7 @@ const formatWorkTime = (seconds: number) => {
   return `${h}:${m}:${s}`;
 };
 
-export function useAttendanceActions(setPunches) {
+export function useAttendanceActions(setIsCheckedIn) {
   const user = getAuth().currentUser;
   const userId = user?.uid;
 
@@ -83,8 +83,8 @@ export function useAttendanceActions(setPunches) {
         workDuration: "",
         status: "absent",
       });
-
-      setPunches((prev) => [...prev, { time: timeOnly, type: "Check-in" }]);
+      setIsCheckedIn(true);
+      // setPunches((prev) => [...prev, { time: timeOnly, type: "Check-in" }]);
       showSuccessToast("Check-in successful!");
     } catch (err) {
       console.error("Firebase error:", err);
@@ -133,7 +133,8 @@ export function useAttendanceActions(setPunches) {
         status: "Present",
       });
 
-      setPunches((prev) => [...prev, { time: timeOnly, type: "Check-out" }]);
+      // setPunches((prev) => [...prev, { time: timeOnly, type: "Check-out" }]);
+      setIsCheckedIn(false);
 
       showSuccessToast("Checked out successfully!");
     } catch (error) {

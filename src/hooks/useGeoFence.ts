@@ -28,7 +28,7 @@ export function useGeofence(setMessage) {
           OFFICE_COORDS.lat,
           OFFICE_COORDS.lng
         );
-        const effectiveRadius = OFFICE_RADIUS_METERS + safeAccuracy + 10;
+        const effectiveRadius = OFFICE_RADIUS_METERS + safeAccuracy + 0;
         const inside = distance <= effectiveRadius;
 
         setIsInside(inside);

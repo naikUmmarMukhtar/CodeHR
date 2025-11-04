@@ -11,7 +11,7 @@ export const API_BASE_URL = import.meta.env.VITE_FIREBASE_DATABASE_URL;
 
 // export const OFFICE_COORDS = { lat: 33.902872, lng: 74.925053 };
 export const OFFICE_COORDS = { lat: 33.999889, lng: 74.792602 };
-export const OFFICE_RADIUS_METERS = 50;
+export const OFFICE_RADIUS_METERS = 40;
 export const CHECKIN_START = { hour: 9, minute: 45 };
 export const CHECKIN_END = { hour: 10, minute: 15 };
 export const CHECKOUT_MIN = { hour: 17, minute: 0 };

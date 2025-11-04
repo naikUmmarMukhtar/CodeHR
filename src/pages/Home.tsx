@@ -34,7 +34,7 @@ export default function Home() {
   const navigate = useNavigate();
   const uid = auth.currentUser?.uid;
   const [isDayCompleted, setIsDayCompleted] = useState(false);
-  const { locationAllowed } = useLocationPermission();
+  const { locationAllowed, retryLocationCheck } = useLocationPermission();
 
   // useDailyReset(() => setIsDayCompleted(false));
 
@@ -97,6 +97,7 @@ export default function Home() {
   const recordPunch = async (todayStatus, setIsLoading, fetchTodayStatus) => {
     if (!locationAllowed) {
       showErrorToast("Turn on location...");
+      retryLocationCheck();
       return;
     }
     if (!isInside) {

@@ -18,6 +18,7 @@ import { auth } from "../firebase/config";
 import Announcements from "../components/Announcements";
 import WorkTimeDisplay from "../components/WorkTimeDisplay";
 import { useLocationPermission } from "../hooks/useLocationPermission";
+import ColorLegend from "../components/ColorLegend";
 
 export default function Home() {
   const [employeeName, setEmployeeName] = useState<string | null>(null);
@@ -106,19 +107,9 @@ export default function Home() {
     }
   };
 
-  const handleLogout = async () => {
-    try {
-      await signOut(getAuth());
-      showSuccessToast("Logged out successfully.");
-      navigate("/");
-    } catch {
-      showErrorToast("Logout failed. Please try again.");
-    }
-  };
-
   return (
     <ContentWrapper>
-      <Header handleLogout={handleLogout} />
+      <Header />
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 w-full mt-6 mb-24">
         <motion.div
           className="flex flex-col justify-between"
@@ -149,6 +140,7 @@ export default function Home() {
         </motion.div>
 
         <AttendanceMainContent />
+        <ColorLegend />
         <Announcements />
       </div>
     </ContentWrapper>

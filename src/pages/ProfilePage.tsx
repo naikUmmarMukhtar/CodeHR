@@ -18,10 +18,14 @@ import {
   UserCircle,
   Camera,
 } from "lucide-react";
+import { getAuth, signOut } from "firebase/auth";
+import { showErrorToast, showSuccessToast } from "../utils/toastMessage";
+import { useNavigate } from "react-router";
 
 export default function ProfilePage() {
   const [profile, setProfile] = useState({});
   const [isLoading, setIsLoading] = useState(true);
+  const navigate = useNavigate();
 
   const uid = auth.currentUser?.uid;
   const userEmail = auth.currentUser?.email;
@@ -63,6 +67,16 @@ export default function ProfilePage() {
       </div>
     );
   }
+
+  const handleLogout = async () => {
+    try {
+      await signOut(getAuth());
+      showSuccessToast("Logged out successfully.");
+      navigate("/");
+    } catch {
+      showErrorToast("Logout failed. Please try again.");
+    }
+  };
 
   return (
     <div
@@ -162,32 +176,10 @@ export default function ProfilePage() {
       <div>
         <h3 className="font-semibold mb-3">Account</h3>
         <div className="space-y-4">
-          <div className="flex items-center gap-2 cursor-pointer hover:opacity-80">
-            <Lock size={16} style={{ color: "var(--color-primary)" }} />
-            Change Password
-          </div>
-
-          <div className="flex items-center gap-2 cursor-pointer hover:opacity-80">
-            <FileText size={16} style={{ color: "var(--color-primary)" }} />
-            Terms & Conditions
-          </div>
-
-          <div className="flex items-center gap-2 cursor-pointer hover:opacity-80">
-            <HelpCircle size={16} style={{ color: "var(--color-primary)" }} />
-            Help & Support
-          </div>
-
-          <div className="flex items-center gap-2 cursor-pointer hover:opacity-80">
-            <ShieldCheck size={16} style={{ color: "var(--color-primary)" }} />
-            Privacy Policy
-          </div>
-
-          <div className="flex items-center gap-2 cursor-pointer hover:opacity-80">
-            <Info size={16} style={{ color: "var(--color-primary)" }} />
-            About Us
-          </div>
-
-          <div className="flex items-center gap-2 text-var(--color-primary) mt-3 cursor-pointer">
+          <div
+            className="flex items-center gap-2 text-var(--color-primary) mt-3 cursor-pointer"
+            onClick={handleLogout}
+          >
             <LogOut size={16} />
             Logout
           </div>

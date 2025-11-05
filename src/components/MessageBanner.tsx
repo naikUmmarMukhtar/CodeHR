@@ -14,20 +14,15 @@ export default function MessageBanner({ message }) {
     lower.includes("denied");
 
   const color = isWithin
-    ? "var(--color-secondary)" // blue (success)
+    ? "var(--color-secondary)"
     : isOutside
-    ? "var(--color-absent)" // red
+    ? "var(--color-absent)"
     : isError
-    ? "var(--color-absent)" // red for errors
+    ? "var(--color-absent)"
     : "var(--color-text-muted)";
 
-  const Icon = isWithin
-    ? CheckCircle
-    : isOutside || isError
-    ? XCircle
-    : AlertCircle;
+  const Icon = isWithin ? CheckCircle : isOutside ? XCircle : "";
 
-  // Replace error message with user-friendly text
   const displayMessage = isError ? "Turn on location to continue" : message;
 
   return (
@@ -36,7 +31,6 @@ export default function MessageBanner({ message }) {
       style={{
         color,
         whiteSpace: "nowrap",
-        backgroundColor: "var(--color-bg-alt)",
       }}
     >
       {Icon && <Icon size={18} />}

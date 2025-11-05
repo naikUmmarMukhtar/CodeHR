@@ -80,7 +80,7 @@ export default function Home() {
   const status = isCheckedIn ? "Checked In" : "Not Checked In";
   const statusColor = isCheckedIn
     ? "var(--color-secondary)"
-    : "var(--color-accent)";
+    : "var(--color-absent)";
 
   const recordPunch = async (todayStatus, setIsLoading, fetchTodayStatus) => {
     if (!locationAllowed) {

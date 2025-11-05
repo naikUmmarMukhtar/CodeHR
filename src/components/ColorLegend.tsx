@@ -5,7 +5,7 @@ export default function ColorLegend() {
     { label: "Absent", color: "var(--color-absent)" },
     { label: "Leave", color: "var(--color-leave)" },
     {
-      label: "Weekend",
+      label: "Weekend/Holiday",
       color: "var(--color-bg-alt)",
       border: "1px solid var(--color-border)",
     },
@@ -21,9 +21,9 @@ export default function ColorLegend() {
       }}
     >
       {legendItems.map((item, i) => (
-        <div key={i} className="flex items-center gap-2 text-sm">
+        <div key={i} className="flex items-center gap-1 text-sm">
           <div
-            className="w-4 h-4 rounded-sm"
+            className="w-3 h-3 rounded-sm"
             style={{
               backgroundColor: item.color,
               border: item.border || "none",

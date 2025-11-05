@@ -24,36 +24,34 @@ export const useLocationPermission = () => {
   };
 
   useEffect(() => {
-    // Check permission first
-    if (navigator.permissions) {
-      navigator.permissions
-        .query({ name: "geolocation" })
-        .then((result) => {
-          if (result.state === "granted") {
-            setLocationAllowed(true);
-          } else if (result.state === "denied") {
-            setLocationAllowed(false);
-          } else {
-            // state === "prompt"
-            setLocationAllowed(null);
-            requestLocation();
-          }
+    let intervalId: number;
 
-          // Watch for permission changes dynamically
-          result.onchange = () => {
-            if (result.state === "granted") setLocationAllowed(true);
-            else if (result.state === "denied") setLocationAllowed(false);
-            else setLocationAllowed(null);
-          };
-        })
-        .catch(() => {
-          // Fallback for browsers that don't support navigator.permissions
+    const checkPermission = async () => {
+      if (navigator.permissions) {
+        try {
+          const result = await navigator.permissions.query({
+            name: "geolocation",
+          });
+
+          if (result.state === "granted") setLocationAllowed(true);
+          else if (result.state === "denied") setLocationAllowed(false);
+          else setLocationAllowed(null);
+        } catch (err) {
+          console.warn("Permission check failed:", err);
           requestLocation();
-        });
-    } else {
-      // Fallback if permissions API not supported (e.g., older iOS)
-      requestLocation();
-    }
+        }
+      } else {
+        requestLocation();
+      }
+    };
+
+    checkPermission();
+
+    intervalId = window.setInterval(() => {
+      checkPermission();
+    }, 1000);
+
+    return () => clearInterval(intervalId);
   }, []);
 
   return { locationAllowed, retryLocationCheck: requestLocation };

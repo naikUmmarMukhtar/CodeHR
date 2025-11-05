@@ -10,7 +10,7 @@ export default function MessageBanner({ message }) {
   const color = isWithin
     ? "var(--color-secondary)" // green
     : isOutside
-    ? "var(--color-primary)"
+    ? "var(--color-absent)"
     : ""; // red
 
   const Icon = isWithin ? CheckCircle : isOutside ? XCircle : null;

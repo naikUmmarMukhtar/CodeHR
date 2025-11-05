@@ -27,6 +27,10 @@ body {
 
   --color-border: #e0e6f1; /* Soft Blue Border */
   --color-hover: #4c7dd1; /* Lighter Blue Hover */
+
+  /* 🎉 Holiday Colors */
+  --color-holiday: #f4b942; /* Warm Gold - Holiday main color */
+  --color-holiday-bg: #fff7e0; /* Soft Golden Tint - Holiday background */
 }
 
 /* === CALENDAR STYLES === */
@@ -36,6 +40,12 @@ body {
   border: none !important;
   font-size: 14px;
   color: var(--color-text);
+}
+.calendar-holiday {
+  background-color: var(--color-holiday-bg) !important;
+  color: var(--color-holiday) !important;
+  font-weight: 500;
+  border: 1px dashed var(--color-border);
 }
 
 .calendar-present {

@@ -4,6 +4,7 @@ import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import { getFromFirebase } from "../api/firebaseAPI";
 import { auth } from "../firebase/config";
+import { FIXED_HOLIDAYS } from "../lib/constants";
 
 export default function AttendanceCalendar() {
   const [attendanceData, setAttendanceData] = useState({});
@@ -51,6 +52,7 @@ export default function AttendanceCalendar() {
   const getTileClass = ({ date }) => {
     const day = date.getDay();
     const dateStr = date.toLocaleDateString("en-CA");
+    if (FIXED_HOLIDAYS.includes(dateStr)) return "calendar-holiday";
 
     if (day === 0 || day === 6) return "calendar-weekend";
 

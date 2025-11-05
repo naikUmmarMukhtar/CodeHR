@@ -16,6 +16,19 @@ export const CHECKIN_START = { hour: 9, minute: 45 };
 export const CHECKIN_END = { hour: 10, minute: 15 };
 export const CHECKOUT_MIN = { hour: 17, minute: 0 };
 
-export const FIXED_HOLIDAYS = ["2025-01-01", "2025-08-15", "2025-12-25"];
+export const FIXED_HOLIDAYS = [
+  "2025-01-01", // New Year
+  "2025-01-26", // Republic Day
+  "2025-02-26", // Maha Shivaratri
+  "2025-03-31", // Ramzan (Id-ul-Fitr)
+  "2025-04-18", // Good Friday
+  "2025-05-01", // May Day
+  "2025-06-06", // Id-ul Ad’ha (Bakrid)
+  "2025-07-06", // Muharram
+  "2025-08-15", // Independence Day
+  "2025-10-02", // Gandhi Jayanti
+  "2025-10-20", // Diwali (Bali Pratipada)
+  "2025-12-25", // Christmas
+];
 
-export const WEEKEND_DAYS = [0, 6]; // 0 = Sunday, 6 = Saturday
+export const WEEKEND_DAYS = [0, 6];

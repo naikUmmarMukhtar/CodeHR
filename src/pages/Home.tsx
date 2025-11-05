@@ -77,20 +77,20 @@ export default function Home() {
     restoreCheckInStatus();
   }, [uid]);
 
-  // ✅ Dynamic status text & color
   const status = isCheckedIn ? "Checked In" : "Not Checked In";
   const statusColor = isCheckedIn
     ? "var(--color-secondary)"
     : "var(--color-accent)";
 
-  // ✅ Main Punch handler
   const recordPunch = async (todayStatus, setIsLoading, fetchTodayStatus) => {
     if (!locationAllowed) {
       showErrorToast("Please turn on location.");
       retryLocationCheck();
       return;
     }
-
+    if (!isInside) {
+      showErrorToast("You are outside the office area.");
+    }
     setIsLoading(true);
     try {
       if (todayStatus === "Check-in") {

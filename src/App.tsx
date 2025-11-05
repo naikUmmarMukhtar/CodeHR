@@ -16,6 +16,7 @@ import { useDeviceCheck } from "./hooks/useDeviceCheck";
 import LeaveHistory from "./pages/LeaveHistory";
 import ProfilePage from "./pages/ProfilePage";
 import HolidayList from "./pages/HolidayList";
+import ScrollToTop from "./components/ScrollToTop";
 
 function App() {
   const { user, loading } = useAuth();
@@ -34,6 +35,7 @@ function App() {
 
   return (
     <>
+      <ScrollToTop />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/history" element={<AttendanceHistory />} />

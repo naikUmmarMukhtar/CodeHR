@@ -26,7 +26,7 @@ function App() {
 
   if (loading) return <Loader />;
 
-  if (!isMobileDevice) return <MobileOnlyPage />;
+  // if (!isMobileDevice) return <MobileOnlyPage />;
   if (isHoliday) return <HolidayPage />;
 
   if (!user || !user.emailVerified) return <MobileAuthForm />;

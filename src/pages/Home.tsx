@@ -90,6 +90,7 @@ export default function Home() {
     }
     if (!isInside) {
       showErrorToast("You are outside the office area.");
+      return;
     }
     setIsLoading(true);
     try {

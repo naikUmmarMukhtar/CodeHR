@@ -4,26 +4,15 @@ import { Power } from "lucide-react";
 
 export default function Header({ handleLogout }) {
   return (
-    <header className="sticky top-0 z-10 bg-(--color-bg) flex items-center justify-between py-3">
-      <div className="relative flex items-center">
-        <img
-          src="/assets/logo.png"
-          alt="Logo"
-          className="h-14 w-auto object-contain"
-        />
-        <span className="absolute bottom-1.5 left-24 ml-[-4px flex items-end  font-semibold text-(--color-secondary) leading-none text-xl ">
-          <span className="text-(--color-primary) mr-1">-</span>
-          HRM
+    <header className="sticky top-0 z-10 bg-(--color-bg) flex items-center justify-center py-4  border-b border-(--color-primary)/20">
+      <div className="relative flex items-end gap-2 group">
+        <h1 className="text-2xl font-extrabold text-(--color-primary) tracking-tight">
+          CodeStrix
+        </h1>
+        <span className="text-xl font-semibold text-(--color-secondary)">
+          <span className="text-(--color-primary) mr-1">–</span>HRM
         </span>
       </div>
-
-      <button
-        onClick={handleLogout}
-        className="flex items-center gap-2 text-(--color-primary) hover:text-(--color-hover) font-medium text-sm transition-colors duration-200"
-      >
-        <Power size={18} />
-        Logout
-      </button>
     </header>
   );
 }

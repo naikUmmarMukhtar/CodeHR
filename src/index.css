@@ -9,23 +9,27 @@ body {
 }
 
 :root {
-  --color-primary: #ff5a5f; /* Coral - Absent */
-  --color-secondary: #00a699; /* Green - Present */
-  --color-accent: #fc642d; /* Orange - Accent for UI highlights */
+  --color-primary: #3c6aba; /* Deep Blue - Primary */
+  --color-secondary: #2d9bf0; /* Sky Blue - Secondary */
+  --color-accent: #6fa8dc; /* Light Blue - Accent for UI highlights */
 
-  --color-leave: #9b59b6; /* Purple - Leave main color */
-  --color-leave-bg: #f4e9f9; /* Light purple tint for leave background */
+  --color-absent: #e94f37; /* Coral Red - Absent main color */
+  --color-absent-bg: #ffe8e5; /* Light Coral tint for absent background */
+
+  --color-leave: #516ca8; /* Indigo Blue - Leave main color */
+  --color-leave-bg: #eaf0ff; /* Light Indigo tint for leave background */
 
   --color-bg: #ffffff; /* White */
-  --color-bg-alt: #f7f7f7; /* Light Grey */
+  --color-bg-alt: #f4f7fb; /* Very Light Blue-Grey */
 
-  --color-text: #484848; /* Charcoal Text */
-  --color-text-muted: #767676; /* Muted Text */
+  --color-text: #2e3a59; /* Dark Slate Text */
+  --color-text-muted: #6b7a99; /* Muted Cool Grey Text */
 
-  --color-border: #ebebeb; /* Light Border */
-  --color-hover: #ff7e82; /* Coral Hover */
+  --color-border: #e0e6f1; /* Soft Blue Border */
+  --color-hover: #4c7dd1; /* Lighter Blue Hover */
 }
 
+/* === CALENDAR STYLES === */
 .simple-calendar {
   width: 100%;
   background: var(--color-bg);
@@ -41,9 +45,10 @@ body {
 }
 
 .calendar-absent {
-  background-color: var(--color-primary) !important;
+  background-color: var(--color-absent) !important;
   color: var(--color-bg) !important;
   font-weight: bold;
+  box-shadow: 0 0 4px var(--color-absent-bg);
 }
 
 .calendar-leave {

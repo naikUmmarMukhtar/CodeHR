@@ -75,3 +75,40 @@ body {
   color: var(--color-bg);
   cursor: pointer;
 }
+.center-toast {
+  display: flex;
+  width: auto !important;
+  height: auto !important;
+  min-width: unset !important;
+  min-height: unset !important;
+  white-space: nowrap;
+  padding: 8px 14px !important;
+  margin: 0 auto;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: normal;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
+  text-align: center;
+}
+
+.success-toast {
+  background-color: var(--color-leave-bg) !important;
+  color: var(--color-secondary) !important;
+}
+
+.error-toast {
+  background-color: var(--color-absent-bg) !important;
+  color: var(--color-absent) !important;
+}
+
+.Toastify__toast-container--top-center {
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: auto !important;
+  height: auto !important;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

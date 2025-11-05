@@ -1,56 +1,25 @@
 // Header.jsx
 //@ts-nocheck
-import { Logout, PowerOff } from "@mui/icons-material";
-import { LogOut, Power } from "lucide-react";
+import { Power } from "lucide-react";
 
 export default function Header({ handleLogout }) {
   return (
-    <header
-      className="py-4"
-      style={{
-        backgroundColor: "var(--color-bg)",
-        position: "sticky",
-        top: 0,
-        zIndex: 10,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-      }}
-    >
-      <h1
-        style={{
-          color: "var(--color-primary)",
-          fontSize: "1.25rem",
-          fontWeight: "800",
-          display: "flex",
-          alignItems: "center",
-          gap: "0.5rem",
-        }}
-      >
-        {/* <MapPin size={20} color="var(--color-secondary)" /> */}
-        CodeHR
-      </h1>
+    <header className="sticky top-0 z-10 bg-(--color-bg) flex items-center justify-between py-3">
+      <div className="relative flex items-center">
+        <img
+          src="/assets/logo.png"
+          alt="Logo"
+          className="h-14 w-auto object-contain"
+        />
+        <span className="absolute bottom-1.5 left-24 ml-[-4px flex items-end  font-semibold text-(--color-secondary) leading-none text-xl ">
+          <span className="text-(--color-primary) mr-1">-</span>
+          HRM
+        </span>
+      </div>
 
       <button
         onClick={handleLogout}
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "0.4rem",
-          background: "none",
-          border: "none",
-          color: "var(--color-primary)",
-          fontSize: "0.9rem",
-          fontWeight: "500",
-          cursor: "pointer",
-          transition: "color 0.2s ease",
-        }}
-        onMouseOver={(e) =>
-          (e.currentTarget.style.color = "var(--color-hover)")
-        }
-        onMouseOut={(e) =>
-          (e.currentTarget.style.color = "var(--color-primary)")
-        }
+        className="flex items-center gap-2 text-(--color-primary) hover:text-(--color-hover) font-medium text-sm transition-colors duration-200"
       >
         <Power size={18} />
         Logout

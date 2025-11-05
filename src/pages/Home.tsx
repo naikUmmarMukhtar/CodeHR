@@ -52,7 +52,6 @@ export default function Home() {
     fetchEmployeeDetails();
   }, [uid]);
 
-  // ✅ Restore today's check-in state
   useEffect(() => {
     const restoreCheckInStatus = async () => {
       if (!uid) return;

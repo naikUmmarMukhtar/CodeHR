@@ -15,7 +15,7 @@ const holidayList = [
 export default function HolidayList() {
   return (
     <div className="min-h-screen bg-(--color-bg-alt) flex justify-center mb-16 ">
-      <div className="w-full max-w-2xl bg-(--color-bg) rounded-2xl shadow-md p-6 border border-(--color-border)">
+      <div className="w-full max-w-2xl bg-(--color-bg) rounded-2xl shadow-md py-6 border border-(--color-border)">
         <h1 className="text-2xl font-semibold text-center mb-6 text-(--color-primary)">
           📅 Holiday List - 2025
         </h1>

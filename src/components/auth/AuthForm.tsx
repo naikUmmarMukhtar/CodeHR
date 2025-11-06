@@ -83,7 +83,7 @@ export default function AuthForm() {
         const uid = auth.currentUser?.uid;
         if (!uid) throw new Error("User not authenticated");
         await sendEmailVerification(user, {
-          url: "https://codehr.netlify.app/",
+          url: "https://hrm.codestrix.in/",
         });
         await signOut(auth);
         setIsLogin(true);

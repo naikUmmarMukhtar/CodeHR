@@ -3,10 +3,12 @@ import { useEffect, useState, useCallback } from "react";
 export const useLocationPermission = () => {
   const [locationAllowed, setLocationAllowed] = useState<boolean | null>(null);
   const [lastCheckTime, setLastCheckTime] = useState(0);
+  const [retryCount, setRetryCount] = useState(0);
+
+  const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
 
   const checkDeviceLocationServices =
     useCallback(async (): Promise<boolean> => {
-      // If last check was less than 1 second ago, don't check again
       const now = Date.now();
       if (now - lastCheckTime < 1000) {
         return locationAllowed ?? false;
@@ -14,24 +16,44 @@ export const useLocationPermission = () => {
       setLastCheckTime(now);
 
       return new Promise((resolve) => {
-        navigator.geolocation.getCurrentPosition(
-          () => {
-            setLocationAllowed(true);
-            resolve(true);
-          },
-          (error) => {
-            console.error("Location check failed:", error);
-            setLocationAllowed(false);
-            resolve(false);
-          },
-          {
-            enableHighAccuracy: true,
-            timeout: 5000,
-            maximumAge: 0,
+        const successHandler = () => {
+          setLocationAllowed(true);
+          setRetryCount(0);
+          resolve(true);
+        };
+
+        const errorHandler = (error: GeolocationPositionError) => {
+          console.error("Location check failed:", error);
+
+          // Special handling for Safari
+          if (isSafari && retryCount < 3) {
+            setRetryCount((prev) => prev + 1);
+            // Try again after a short delay
+            setTimeout(() => {
+              navigator.geolocation.getCurrentPosition(
+                successHandler,
+                errorHandler,
+                {
+                  enableHighAccuracy: true,
+                  timeout: 10000, // Longer timeout for Safari
+                  maximumAge: 0,
+                }
+              );
+            }, 1000);
+            return;
           }
-        );
+
+          setLocationAllowed(false);
+          resolve(false);
+        };
+
+        navigator.geolocation.getCurrentPosition(successHandler, errorHandler, {
+          enableHighAccuracy: true,
+          timeout: isSafari ? 10000 : 5000, // Longer timeout for Safari
+          maximumAge: 0,
+        });
       });
-    }, [locationAllowed, lastCheckTime]);
+    }, [locationAllowed, lastCheckTime, retryCount, isSafari]);
 
   const requestLocation = useCallback(async () => {
     if (!navigator.geolocation) {
@@ -40,6 +62,8 @@ export const useLocationPermission = () => {
       return;
     }
 
+    // Reset retry count when manually requesting location
+    setRetryCount(0);
     await checkDeviceLocationServices();
   }, [checkDeviceLocationServices]);
 
@@ -50,12 +74,10 @@ export const useLocationPermission = () => {
       if (!isSubscribed) return;
 
       try {
-        // Request the permission first
         const result = await checkDeviceLocationServices();
         if (!isSubscribed) return;
 
         if (result) {
-          // If we got here, location is working
           setLocationAllowed(true);
         }
       } catch (err) {
@@ -68,14 +90,14 @@ export const useLocationPermission = () => {
     // Initial check
     checkPermission();
 
-    // Set up interval for periodic checks
-    const intervalId = setInterval(checkPermission, 2000);
+    // Longer interval for Safari to reduce permission prompts
+    const intervalId = setInterval(checkPermission, isSafari ? 5000 : 2000);
 
     return () => {
       isSubscribed = false;
       clearInterval(intervalId);
     };
-  }, [checkDeviceLocationServices]);
+  }, [checkDeviceLocationServices, isSafari]);
 
   return {
     locationAllowed,

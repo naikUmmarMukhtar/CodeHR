@@ -3,21 +3,22 @@ import { Link } from "react-router";
 // @ts-nocheck
 export default function ColorLegend() {
   const legendItems = [
-    { label: "Present", color: "var(--color-secondary)" },
-    { label: "Absent", color: "var(--color-absent)" },
-    { label: "Leave", color: "var(--color-leave)" },
-    { label: "Holiday", color: "var(--color-holiday)" },
+    { label: "P", meaning: "Present", color: "var(--color-secondary)" },
+    { label: "A", meaning: "Absent", color: "var(--color-absent)" },
+    { label: "L", meaning: "Leave", color: "var(--color-leave)" },
+    { label: "H", meaning: "Holiday", color: "var(--color-holiday)" },
     {
-      label: "Weekend",
+      label: "W",
+      meaning: "Weekend",
       color: "var(--color-bg-alt)",
       border: "1px solid var(--color-border)",
     },
   ];
 
   return (
-    <div>
+    <div className="text-center">
       <div
-        className="flex flex-wrap items-center gap-3 p-3"
+        className="grid grid-cols-5 gap-4 p-4 rounded-lg shadow-sm"
         style={{
           backgroundColor: "var(--color-bg)",
           color: "var(--color-text)",
@@ -25,22 +26,28 @@ export default function ColorLegend() {
         }}
       >
         {legendItems.map((item, i) => (
-          <div key={i} className="flex items-center gap-1 text-xs">
+          <div
+            key={i}
+            className="flex flex-col items-center justify-center gap-1 text-sm font-medium"
+          >
             <div
-              className="w-3 h-3 rounded-sm"
+              className="w-8 h-8 rounded-md flex items-center justify-center text-(--color-bg) text-base font-semibold"
               style={{
                 backgroundColor: item.color,
                 border: item.border || "none",
               }}
-            ></div>
-            <span>{item.label}</span>
+            >
+              {item.label}
+            </div>
+            <span className="text-xs opacity-80">{item.meaning}</span>
           </div>
         ))}
       </div>
-      <div className="flex justify-center mt-3">
+
+      <div className="mt-4">
         <Link
           to="/holiday-list"
-          className="text-sm font-medium underline transition-all duration-200"
+          className="text-sm font-semibold underline hover:text-opacity-80 transition-all duration-200"
           style={{
             color: "var(--color-primary)",
           }}

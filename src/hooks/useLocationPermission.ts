@@ -1,114 +1,84 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 
 export const useLocationPermission = () => {
   const [locationAllowed, setLocationAllowed] = useState<boolean | null>(null);
+  const [lastCheckTime, setLastCheckTime] = useState(0);
 
-  const checkDeviceLocationServices = async (): Promise<boolean> => {
-    // Check if running on iOS
-    const isIOS =
-      /iPad|iPhone|iPod/.test(navigator.platform) ||
-      (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-
-    if (isIOS) {
-      // For iOS devices, we can try to get high accuracy position
-      // If location services are disabled, this will fail quickly
-      try {
-        await new Promise((resolve, reject) => {
-          navigator.geolocation.getCurrentPosition(resolve, reject, {
-            enableHighAccuracy: true,
-            timeout: 2000, // Short timeout to quickly detect if location services are off
-            maximumAge: 0,
-          });
-        });
-        return true;
-      } catch (error: any) {
-        // Check if the error is related to device settings being off
-        if (
-          error.code === 2 || // POSITION_UNAVAILABLE
-          error.code === 1
-        ) {
-          // PERMISSION_DENIED
-          return false;
-        }
-        console.error("Error checking device location services:", error);
-        return false;
+  const checkDeviceLocationServices =
+    useCallback(async (): Promise<boolean> => {
+      // If last check was less than 1 second ago, don't check again
+      const now = Date.now();
+      if (now - lastCheckTime < 1000) {
+        return locationAllowed ?? false;
       }
-    }
+      setLastCheckTime(now);
 
-    return true; // For non-iOS devices, return true and let browser permission handle it
-  };
+      return new Promise((resolve) => {
+        navigator.geolocation.getCurrentPosition(
+          () => {
+            setLocationAllowed(true);
+            resolve(true);
+          },
+          (error) => {
+            console.error("Location check failed:", error);
+            setLocationAllowed(false);
+            resolve(false);
+          },
+          {
+            enableHighAccuracy: true,
+            timeout: 5000,
+            maximumAge: 0,
+          }
+        );
+      });
+    }, [locationAllowed, lastCheckTime]);
 
-  const requestLocation = async () => {
+  const requestLocation = useCallback(async () => {
     if (!navigator.geolocation) {
       console.warn("Geolocation is not supported by this browser.");
       setLocationAllowed(false);
       return;
     }
 
-    // First check device location services
-    const deviceLocationEnabled = await checkDeviceLocationServices();
-    if (!deviceLocationEnabled) {
-      setLocationAllowed(false);
-      return;
-    }
-
-    // Then check browser permissions
-    navigator.geolocation.getCurrentPosition(
-      () => setLocationAllowed(true),
-      (error) => {
-        if (error.code === error.PERMISSION_DENIED) {
-          setLocationAllowed(false);
-        } else {
-          console.error("Geolocation error:", error);
-          setLocationAllowed(false);
-        }
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 5000,
-        maximumAge: 0,
-      }
-    );
-  };
+    await checkDeviceLocationServices();
+  }, [checkDeviceLocationServices]);
 
   useEffect(() => {
-    let intervalId: number;
+    let isSubscribed = true;
 
     const checkPermission = async () => {
-      if (navigator.permissions) {
-        try {
-          // First check device location services
-          const deviceLocationEnabled = await checkDeviceLocationServices();
-          if (!deviceLocationEnabled) {
-            setLocationAllowed(false);
-            return;
-          }
+      if (!isSubscribed) return;
 
-          // Then check browser permissions
-          const result = await navigator.permissions.query({
-            name: "geolocation" as PermissionName,
-          });
+      try {
+        // Request the permission first
+        const result = await checkDeviceLocationServices();
+        if (!isSubscribed) return;
 
-          if (result.state === "granted") setLocationAllowed(true);
-          else if (result.state === "denied") setLocationAllowed(false);
-          else setLocationAllowed(null);
-        } catch (err) {
-          console.warn("Permission check failed:", err);
-          requestLocation();
+        if (result) {
+          // If we got here, location is working
+          setLocationAllowed(true);
         }
-      } else {
-        requestLocation();
+      } catch (err) {
+        if (!isSubscribed) return;
+        console.warn("Permission check failed:", err);
+        setLocationAllowed(false);
       }
     };
 
+    // Initial check
     checkPermission();
 
-    intervalId = window.setInterval(() => {
-      checkPermission();
-    }, 1000);
+    // Set up interval for periodic checks
+    const intervalId = setInterval(checkPermission, 2000);
 
-    return () => clearInterval(intervalId);
-  }, []);
+    return () => {
+      isSubscribed = false;
+      clearInterval(intervalId);
+    };
+  }, [checkDeviceLocationServices]);
 
-  return { locationAllowed, retryLocationCheck: requestLocation };
+  return {
+    locationAllowed,
+    retryLocationCheck: requestLocation,
+  };
 };

@@ -83,15 +83,20 @@ export default function Home() {
     : "var(--color-absent)";
 
   const recordPunch = async (todayStatus, setIsLoading, fetchTodayStatus) => {
+    // Try to get location permission first
+    await retryLocationCheck();
+    
+    // Now check if location is allowed
     if (!locationAllowed) {
-      showErrorToast("Please turn on location.");
-      retryLocationCheck();
+      showErrorToast("Please enable location access in your device settings and browser permissions.");
       return;
     }
+
     if (!isInside) {
       showErrorToast("You are outside the office area.");
       return;
     }
+
     setIsLoading(true);
     try {
       if (todayStatus === "Check-in") {

@@ -1,25 +1,25 @@
 // @ts-nocheck
 import { useIsMobile } from "../../hooks/useIsMobile";
-import { useLoginValidation } from "../../hooks/useLoginValidation";
 import FormInput from "../shared/FormInput";
-import type { LoginSignUpFormProps } from "../../types";
 import AuthHeader from "./AuthHeader";
 
-export default function LoginForm({
+export default function AdminLogin({
   formData,
   handleChange,
   handleSubmit,
   loading,
   error,
-  message,
-}: LoginSignUpFormProps) {
+}: {
+  formData: { email: string; password: string };
+  handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
+  loading: boolean;
+  error?: string;
+}) {
   const isMobile = useIsMobile();
-  const { errors, showErrors, validate } = useLoginValidation();
 
   const onSubmit = (e) => {
     e.preventDefault();
-    const fieldErrors = validate(formData);
-    if (Object.keys(fieldErrors).length > 0) return;
     handleSubmit(e);
   };
 
@@ -34,16 +34,17 @@ export default function LoginForm({
         color: "var(--color-text)",
       }}
     >
-      <AuthHeader mode="employeeLogin" />
+      {/* 🔹 Header */}
+      <AuthHeader mode="adminLogin" />
 
+      {/* 🔹 Input Fields */}
       <div className="w-full space-y-4">
         <FormInput
-          label="Email"
+          label="Admin Email"
           name="email"
           type="email"
-          value={formData?.email}
+          value={formData.email}
           onChange={handleChange}
-          error={showErrors ? errors.email : undefined}
           required
         />
 
@@ -51,14 +52,13 @@ export default function LoginForm({
           label="Password"
           name="password"
           type="password"
-          value={formData?.password}
+          value={formData.password}
           onChange={handleChange}
-          error={showErrors ? errors.password : undefined}
           required
         />
       </div>
 
-      {/* 🔹 Error / Success Messages */}
+      {/* 🔹 Error Message */}
       {error && (
         <div
           className="text-sm font-medium"
@@ -67,17 +67,10 @@ export default function LoginForm({
           {error}
         </div>
       )}
-      {message && (
-        <div
-          className="text-sm font-medium"
-          style={{ color: "var(--color-secondary)" }}
-        >
-          {message}
-        </div>
-      )}
 
-      {/* 🔹 Login Button */}
+      {/* 🔹 Submit Button */}
       <button
+        type="submit"
         disabled={loading}
         className="w-full rounded-full px-8 py-3 text-sm font-bold uppercase mt-2 disabled:opacity-60 disabled:cursor-not-allowed transition-all"
         style={{
@@ -91,7 +84,7 @@ export default function LoginForm({
           (e.currentTarget.style.backgroundColor = "var(--color-primary)")
         }
       >
-        {loading ? "Logging in..." : "Log In"}
+        {loading ? "Logging in..." : "Login as Admin"}
       </button>
     </form>
   );

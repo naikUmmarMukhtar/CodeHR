@@ -23,7 +23,7 @@ export default function AttendanceHistory() {
       setIsLoading(true);
 
       try {
-        const data = await getFromFirebase(`${uid}/attendance`);
+        const data = await getFromFirebase(`/teammembers/${uid}/attendance`);
         console.log("Fetched history data:", data);
 
         if (data) {

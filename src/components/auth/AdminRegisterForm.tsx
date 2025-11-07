@@ -1,15 +1,13 @@
 // @ts-nocheck
-
 import { useState } from "react";
 import { useIsMobile } from "../../hooks/useIsMobile";
 import { AlertTriangle } from "lucide-react";
 import { useRegisterValidation } from "../../hooks/useRegisterValidation";
 import FormInput from "../shared/FormInput";
-import PasswordCriteria from "./PasswordCriteria";
-import ContentWrapper from "../shared/ContentWrapper";
 import AuthHeader from "./AuthHeader";
+import PasswordCriteria from "./PasswordCriteria";
 
-export default function RegisterForm({
+export default function AdminRegisterForm({
   formData,
   handleChange,
   handleSubmit,
@@ -39,8 +37,10 @@ export default function RegisterForm({
         color: "var(--color-text)",
       }}
     >
-      <AuthHeader mode="employeeRegister" />
+      {/* 🔹 Header */}
+      <AuthHeader mode="adminRegister" />
 
+      {/* 🔹 Validation Warning */}
       {hasErrors && (
         <div
           className="flex items-center gap-2 text-sm p-2 rounded-md justify-center"
@@ -49,18 +49,20 @@ export default function RegisterForm({
           }}
         >
           <AlertTriangle size={18} />
-          <span>Fill All Required Fields</span>
+          <span>Fill all required fields correctly</span>
         </div>
       )}
 
+      {/* 🔹 Input Fields */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <FormInput
-          label="User Name (as per ID)"
+          label="Full Name"
           name="username"
           type="text"
           value={formData.username}
           onChange={handleChange}
           error={submitted ? errors.username : ""}
+          required
         />
 
         <FormInput
@@ -70,6 +72,7 @@ export default function RegisterForm({
           value={formData.email}
           onChange={handleChange}
           error={submitted ? errors.email : ""}
+          required
         />
 
         <FormInput
@@ -79,6 +82,7 @@ export default function RegisterForm({
           value={formData.password}
           onChange={handleChange}
           error={submitted ? errors.password : ""}
+          required
         />
         <FormInput
           label="Confirm Password"
@@ -87,11 +91,24 @@ export default function RegisterForm({
           value={formData.confirmPassword}
           onChange={handleChange}
           error={submitted ? errors.confirmPassword : ""}
+          required
+        />
+
+        <FormInput
+          label="Admin Secret Code"
+          name="adminCode"
+          type="text"
+          value={formData.adminCode}
+          onChange={handleChange}
+          error={submitted ? errors.adminCode : ""}
+          required
         />
       </div>
 
+      {/* 🔹 Password Criteria */}
       <PasswordCriteria password={formData.password} showColors={submitted} />
 
+      {/* 🔹 Error / Success Messages */}
       {error && (
         <div
           className="text-sm font-medium rounded-md p-2"
@@ -113,7 +130,7 @@ export default function RegisterForm({
         </div>
       )}
 
-      {/* Submit Button */}
+      {/* 🔹 Submit Button */}
       <button
         disabled={loading}
         className="w-full rounded-full py-3 text-sm font-bold uppercase mt-2 transition-all"
@@ -123,8 +140,14 @@ export default function RegisterForm({
           opacity: loading ? 0.6 : 1,
           cursor: loading ? "not-allowed" : "pointer",
         }}
+        onMouseOver={(e) =>
+          (e.currentTarget.style.backgroundColor = "var(--color-hover)")
+        }
+        onMouseOut={(e) =>
+          (e.currentTarget.style.backgroundColor = "var(--color-primary)")
+        }
       >
-        {loading ? "Signing Up..." : "Sign Up"}
+        {loading ? "Registering..." : "Register as Admin"}
       </button>
     </form>
   );

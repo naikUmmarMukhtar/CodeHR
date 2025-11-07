@@ -30,7 +30,7 @@ export default function LeaveHistory() {
       if (!uid) return;
       setIsLoading(true);
       try {
-        const data = await getFromFirebase(`${uid}/attendance`);
+        const data = await getFromFirebase(`/teammembers/${uid}/attendance`);
         if (data) {
           const formatted = Object.entries(data)
             .map(([date, record]) => {
@@ -91,7 +91,10 @@ export default function LeaveHistory() {
         workDuration: "00:00:00",
       };
 
-      await putToFirebase(`${uid}/attendance/${selectedDate}`, leaveData);
+      await putToFirebase(
+        `/teammembers/${uid}/attendance/${selectedDate}`,
+        leaveData
+      );
       showSuccessToast("Leave applied successfully!");
 
       setLeaves((prev) => [{ date: selectedDate, ...leaveData }, ...prev]);

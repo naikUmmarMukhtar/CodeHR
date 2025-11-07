@@ -1,48 +1,87 @@
 // @ts-nocheck
-import { Navigate, Route, Routes } from "react-router";
+import { Navigate, Route, Routes, useNavigate } from "react-router";
+import { useEffect, useState } from "react";
 import Loader from "./components/shared/Loader";
 import Home from "./pages/Home";
 import MobileAuthForm from "./components/auth/AuthForm";
 import HolidayPage from "./pages/HolidayPage";
-import LocationPermissionPage from "./pages/LocationPermissionPage";
 import AttendanceHistory from "./pages/AttendanceHistory";
 import MobileNav from "./components/shared/MobileNav";
-import MobileOnlyPage from "./pages/MobileOnlyPage";
-
-import { useAuth } from "./hooks/useAuth";
-import { useHolidayCheck } from "./hooks/useHolidayCheck";
-import { useLocationPermission } from "./hooks/useLocationPermission";
-import { useDeviceCheck } from "./hooks/useDeviceCheck";
 import LeaveHistory from "./pages/LeaveHistory";
 import ProfilePage from "./pages/ProfilePage";
 import HolidayList from "./pages/HolidayList";
 import ScrollToTop from "./components/ScrollToTop";
+import AdminDashboard from "./pages/AdminDashboard";
+
+import { useAuth } from "./hooks/useAuth";
+import { useHolidayCheck } from "./hooks/useHolidayCheck";
+import { getFromFirebase } from "./api/firebaseAPI";
 
 function App() {
-  const { user, loading } = useAuth();
   const isHoliday = useHolidayCheck();
-  const { locationAllowed } = useLocationPermission();
-  const isMobileDevice = useDeviceCheck();
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [checkingAdmin, setCheckingAdmin] = useState(true);
 
-  if (loading) return <Loader />;
+  useEffect(() => {
+    const checkAdminStatus = async () => {
+      if (user && user.email) {
+        try {
+          const admins = await getFromFirebase("/admins/");
+          const adminExists = admins
+            ? Object.values(admins).some((admin) => admin.email === user.email)
+            : false;
 
-  // if (!isMobileDevice) return <MobileOnlyPage />;
+          setIsAdmin(adminExists);
+
+          if (adminExists) {
+            navigate("/admin-dashboard", { replace: true });
+          } else {
+            navigate("/", { replace: true });
+          }
+        } catch (err) {
+          console.error("Error checking admin:", err);
+        }
+      }
+      setCheckingAdmin(false);
+    };
+
+    checkAdminStatus();
+  }, [user]);
+
+  if (loading || checkingAdmin) return <Loader />;
+
   if (isHoliday) return <HolidayPage />;
 
-  if (!user || !user.emailVerified) return <MobileAuthForm />;
+  if (!user) return <MobileAuthForm />;
 
   return (
     <>
       <ScrollToTop />
       <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/history" element={<AttendanceHistory />} />
-        <Route path="/leave-history" element={<LeaveHistory />} />
-        <Route path="/profile" element={<ProfilePage />} />
-        <Route path="/holiday-list" element={<HolidayList />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
+        {isAdmin ? (
+          <>
+            <Route path="/" element={<AdminDashboard />} />
+            <Route path="/admin-dashboard" element={<AdminDashboard />} />
+            <Route
+              path="*"
+              element={<Navigate to="/admin-dashboard" replace />}
+            />
+          </>
+        ) : (
+          <>
+            <Route path="/" element={<Home />} />
+            <Route path="/history" element={<AttendanceHistory />} />
+            <Route path="/leave-history" element={<LeaveHistory />} />
+            <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/holiday-list" element={<HolidayList />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </>
+        )}
       </Routes>
-      <MobileNav />
+
+      {!isAdmin && <MobileNav />}
     </>
   );
 }

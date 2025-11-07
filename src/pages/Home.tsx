@@ -39,7 +39,9 @@ export default function Home() {
     const fetchEmployeeDetails = async () => {
       if (!uid) return;
       try {
-        const details = await getFromFirebase(`${uid}/userDetails`);
+        const details = await getFromFirebase(
+          `/teammembers/${uid}/userDetails`
+        );
         const employeeRecord = details ? Object.values(details)[0] : null;
         if (employeeRecord?.userName) setEmployeeName(employeeRecord.userName);
         else if (employeeRecord?.displayName)
@@ -59,7 +61,9 @@ export default function Home() {
       const todayKey = new Date().toLocaleDateString("en-CA");
 
       try {
-        const record = await getFromFirebase(`${uid}/attendance/${todayKey}`);
+        const record = await getFromFirebase(
+          `/teammembers/${uid}/attendance/${todayKey}`
+        );
         if (!record) return;
 
         const data = Object.values(record)[0] || record;

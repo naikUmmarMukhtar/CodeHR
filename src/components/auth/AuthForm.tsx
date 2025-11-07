@@ -97,9 +97,9 @@ export default function AuthForm() {
 
   return (
     <div className="min-h-screen flex items-center justify-center ">
-      <div className="relative w-full max-w-4xl rounded-2xl overflow-hidden bg-(--color-bg) text-(--color-text)">
+      <div className="relative w-full max-w-4xl rounded-2xl overflow-hidden bg-[var(--color-bg)] text-[var(--color-text)]">
         <div
-          className={`flex w-[400% transition-transform duration-500 ease-in-out`}
+          className={`flex w-[400%] transition-transform duration-500 ease-in-out`}
           style={{
             transform:
               slide === "employeeLogin"
@@ -120,20 +120,20 @@ export default function AuthForm() {
               error={error}
               message={message}
             />
-            <p className="mt-4 text-center text-sm text-(--color-text-muted)">
+            <p className="mt-4 text-center text-sm text-[var(--color-text-muted)]">
               Don’t have an account?{" "}
               <button
                 onClick={() => {
                   setSlide("employeeRegister");
                   clearFields();
                 }}
-                className="text-(--color-primary) font-semibold"
+                className="text-[var(--color-primary)] font-semibold"
               >
                 Sign Up
               </button>
             </p>
             <p
-              className="mt-2 text-center text-sm underline cursor-pointer text-(--color-secondary)"
+              className="mt-2 text-center text-sm underline cursor-pointer text-[var(--color-secondary)]"
               onClick={() => {
                 setSlide("adminLogin");
                 clearFields();
@@ -152,20 +152,20 @@ export default function AuthForm() {
               error={error}
               message={message}
             />
-            <p className="mt-4 text-center text-sm text-(--color-text-muted)">
+            <p className="mt-4 text-center text-sm text-[var(--color-text-muted)]">
               Already have an account?{" "}
               <button
                 onClick={() => {
                   setSlide("employeeLogin");
                   clearFields();
                 }}
-                className="text-(--color-primary) font-semibold"
+                className="text-[var(--color-primary)] font-semibold"
               >
                 Log In
               </button>
             </p>
             <p
-              className="mt-2 text-center text-sm underline cursor-pointer text-(--color-secondary)"
+              className="mt-2 text-center text-sm underline cursor-pointer text-[var(--color-secondary)]"
               onClick={() => {
                 setSlide("adminRegister");
                 clearFields();
@@ -185,13 +185,13 @@ export default function AuthForm() {
               loading={loading}
             />
             <p
-              className="mt-4 text-center text-sm underline cursor-pointer text-(--color-secondary)"
+              className="mt-4 text-center text-sm underline cursor-pointer text-[var(--color-secondary)]"
               onClick={() => setSlide("employeeLogin")}
             >
               Back to Employee Login
             </p>
             <p
-              className="mt-2 text-center text-sm underline cursor-pointer text-(--color-secondary)"
+              className="mt-2 text-center text-sm underline cursor-pointer text-[var(--color-secondary)]"
               onClick={() => {
                 setSlide("adminRegister");
                 clearFields();
@@ -212,7 +212,7 @@ export default function AuthForm() {
               loading={loading}
             />
             <p
-              className="mt-4 text-center text-sm underline cursor-pointer text-(--color-secondary)"
+              className="mt-4 text-center text-sm underline cursor-pointer text-[var(--color-secondary)]"
               onClick={() => setSlide("adminLogin")}
             >
               Back to Admin Login

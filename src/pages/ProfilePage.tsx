@@ -35,17 +35,15 @@ export default function ProfilePage() {
       if (!uid) return;
       setIsLoading(true);
       try {
-        const data = await getFromFirebase(`${uid}/userDetails`);
+        const data = await getFromFirebase(`/teammembers/${uid}/userDetails`);
         console.log("Fetched data:", data);
 
-        // Get first child object (Firebase pushes generate random keys)
         const firstKey = Object.keys(data || {})[0];
         const userData = data?.[firstKey] || {};
 
         setProfile({
-          name: userData.userName || "User Name",
+          name: userData.username || "User Name",
           email: userData.email || userEmail || "example@mail.com",
-          phone: userData.phone || "Not provided",
           address: userData.department || "Software Engineer",
           memberSince: userData.memberSince || "05-September-2025",
           status: userData.status || "Active Member",
@@ -188,7 +186,7 @@ export default function ProfilePage() {
 
       {/* Footer */}
       <div className="mt-10 text-center text-xs text-(--color-text-muted)">
-        CodeHR v1.0.1
+        CodeStrix HRM v1.0.1
         <br />
         <span className="flex justify-center items-center gap-1 mt-1">
           Made with <span className="text-red-500">❤️</span> for CodeStrix Staff

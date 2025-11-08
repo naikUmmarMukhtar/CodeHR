@@ -77,7 +77,7 @@ export function useAttendanceActions(setIsCheckedIn) {
         if (!confirmLate) return;
       }
 
-      await postToFirebase(`${userId}/attendance/${today}`, {
+      await postToFirebase(`/teammembers/${userId}/attendance/${today}`, {
         checkIn: timeOnly,
         checkOut: "",
         workDuration: "",
@@ -106,7 +106,7 @@ export function useAttendanceActions(setIsCheckedIn) {
       }
 
       const existingData = await getFromFirebase(
-        `${userId}/attendance/${today}`
+        `/teammembers/${userId}/attendance/${today}`
       );
       if (!existingData) {
         showErrorToast("No check-in found for today.");

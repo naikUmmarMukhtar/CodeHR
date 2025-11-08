@@ -11,12 +11,13 @@ export default function AuthHeader({
     : `Create ${isAdmin ? "Admin" : "Employee"} Account`;
 
   return (
-    <div className="text-center space-y-2">
+    <div className="text-center space-y-2 mb-6">
       <h1 className="font-bold tracking-tight">
         <span className="text-(--color-primary) text-3xl sm:text-4xl md:text-5xl">
-          CodeStrix
-        </span>{" "}
+          CodeStrix{" "}
+        </span>
         <span className="text-(--color-secondary) text-3xl sm:text-4xl md:text-5xl">
+          {" "}
           HRM
         </span>
       </h1>

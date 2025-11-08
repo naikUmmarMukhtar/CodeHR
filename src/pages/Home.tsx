@@ -34,7 +34,6 @@ export default function Home() {
   const uid = auth.currentUser?.uid;
   const { locationAllowed, retryLocationCheck } = useLocationPermission();
 
-  // ✅ Fetch employee details
   useEffect(() => {
     const fetchEmployeeDetails = async () => {
       if (!uid) return;
@@ -43,11 +42,7 @@ export default function Home() {
           `/teammembers/${uid}/userDetails`
         );
         const employeeRecord = details ? Object.values(details)[0] : null;
-        if (employeeRecord?.userName) setEmployeeName(employeeRecord.userName);
-        else if (employeeRecord?.displayName)
-          setEmployeeName(employeeRecord.displayName);
-        else if (employeeRecord?.email)
-          setEmployeeName(employeeRecord.email.split("@")[0]);
+        if (employeeRecord?.username) setEmployeeName(employeeRecord.username);
       } catch (error) {
         console.error("Error fetching employee details:", error);
       }
@@ -68,7 +63,6 @@ export default function Home() {
 
         const data = Object.values(record)[0] || record;
         if (data.checkIn && !data.checkOut) {
-          // Checked in but not out
           setIsCheckedIn(true);
         } else {
           setIsCheckedIn(false);
@@ -92,10 +86,10 @@ export default function Home() {
       retryLocationCheck();
       return;
     }
-    if (!isInside) {
-      showErrorToast("You are outside the office area.");
-      return;
-    }
+    // if (!isInside) {
+    //   showErrorToast("You are outside the office area.");
+    //   return;
+    // }
     setIsLoading(true);
     try {
       if (todayStatus === "Check-in") {

@@ -6,7 +6,7 @@ import {
   signOut,
 } from "firebase/auth";
 import { auth } from "../firebase/config";
-import { showSuccessToast } from "../utils/toastMessage";
+import { showErrorToast, showSuccessToast } from "../utils/toastMessage";
 import firebaseErrorMessages from "../utils/firebaseErrorMessages";
 import { getFromFirebase, postToFirebase } from "../api/firebaseAPI";
 
@@ -14,6 +14,8 @@ export const useAuthForm = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
+
+  console.log(error, "+++");
 
   const handleEmployeeLogin = async (email, password) => {
     try {
@@ -26,6 +28,8 @@ export const useAuthForm = () => {
       showSuccessToast("Employee login successful!");
       return userCredential.user;
     } catch (err) {
+      console.log(err, "err");
+
       setError(firebaseErrorMessages[err.code] || "Login failed.");
       return null;
     } finally {
@@ -34,15 +38,15 @@ export const useAuthForm = () => {
   };
 
   const handleEmployeeRegister = async (
-    name,
+    username,
     email,
     password,
     confirmPassword
   ) => {
-    if (password !== confirmPassword) {
-      setError("Passwords do not match.");
-      return;
-    }
+    // if (password !== confirmPassword) {
+    //   setError("Passwords do not match.");
+    //   return;
+    // }
     try {
       setLoading(true);
       const userCredential = await createUserWithEmailAndPassword(
@@ -52,8 +56,9 @@ export const useAuthForm = () => {
       );
       const uid = userCredential.user.uid;
       await postToFirebase(`/teammembers/${uid}/userDetails`, {
-        userName: name,
+        username,
         email,
+        password,
         createdAt: new Date().toISOString(),
       });
       setMessage("Account created successfully. Please log in.");
@@ -94,20 +99,20 @@ export const useAuthForm = () => {
   };
 
   const handleAdminRegister = async (
-    name,
+    username,
     email,
     password,
     confirmPassword,
     adminCode
   ) => {
-    if (password !== confirmPassword) {
-      setError("Passwords do not match.");
-      return;
-    }
+    // if (password !== confirmPassword) {
+    //   setError("Passwords do not match.");
+    //   return;
+    // }
 
     const ADMIN_SECRET_CODE = "SECRET123";
     if (adminCode !== ADMIN_SECRET_CODE) {
-      setError("Invalid admin code.");
+      showErrorToast("Invalid admin code.");
       return;
     }
 
@@ -119,8 +124,9 @@ export const useAuthForm = () => {
         password
       );
       await postToFirebase("/admins/", {
-        name,
+        username,
         email,
+        password,
         createdAt: new Date().toISOString(),
       });
       setMessage("Admin account created. Please log in.");

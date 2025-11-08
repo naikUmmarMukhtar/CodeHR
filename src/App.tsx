@@ -34,12 +34,6 @@ function App() {
             : false;
 
           setIsAdmin(adminExists);
-
-          if (adminExists) {
-            navigate("/admin-dashboard", { replace: true });
-          } else {
-            navigate("/", { replace: true });
-          }
         } catch (err) {
           console.error("Error checking admin:", err);
         }
@@ -52,7 +46,7 @@ function App() {
 
   if (loading || checkingAdmin) return <Loader />;
 
-  if (isHoliday) return <HolidayPage />;
+  // if (isHoliday) return <HolidayPage />;
 
   if (!user) return <MobileAuthForm />;
 

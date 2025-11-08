@@ -1,17 +1,17 @@
 // @ts-nocheck
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import LoginForm from "./LoginForm";
-import RegisterForm from "./RegisterForm";
-import AdminLogin from "./AdminLogin";
-import AdminRegisterForm from "./AdminRegisterForm";
-import { showSuccessToast } from "../../utils/toastMessage";
+import { User, Shield } from "lucide-react";
+import AdminAuthForm from "./AdminAuthForm";
+import EmployeeAuthForm from "./EmployeeAuthForm";
+import { showErrorToast, showSuccessToast } from "../../utils/toastMessage";
 import { useAuthForm } from "../../hooks/useAuthForm";
+import { getFromFirebase } from "../../api/firebaseAPI";
 
 export default function AuthForm() {
   const [slide, setSlide] = useState("employeeLogin");
   const [formData, setFormData] = useState({
-    name: "",
+    username: "",
     email: "",
     password: "",
     confirmPassword: "",
@@ -19,7 +19,6 @@ export default function AuthForm() {
   });
 
   const navigate = useNavigate();
-
   const {
     loading,
     error,
@@ -32,14 +31,9 @@ export default function AuthForm() {
     handleAdminRegister,
   } = useAuthForm();
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
   const clearFields = () => {
     setFormData({
-      name: "",
+      username: "",
       email: "",
       password: "",
       confirmPassword: "",
@@ -49,37 +43,61 @@ export default function AuthForm() {
     setMessage("");
   };
 
-  const handleSubmit = async (e) => {
+  // 🔹 Employee Submit
+  const handleEmployeeSubmit = async (e, mode) => {
     e.preventDefault();
     setError("");
     setMessage("");
-
-    const { name, email, password, confirmPassword, adminCode } = formData;
+    const { username, email, password, confirmPassword } = formData;
 
     try {
-      if (slide === "employeeLogin") {
+      if (mode === "login") {
         const user = await handleEmployeeLogin(email, password);
         if (user) {
-          showSuccessToast("Welcome!");
-          navigate("/employee-dashboard");
-        }
-      }
+          const admins = await getFromFirebase("/admins/");
+          const adminExists = admins
+            ? Object.values(admins).some((admin) => admin.email === email)
+            : false;
 
-      if (slide === "employeeRegister") {
-        await handleEmployeeRegister(name, email, password, confirmPassword);
+          showSuccessToast("Welcome!");
+          if (!adminExists) {
+            showErrorToast("Cannot login as employee from admin portal.");
+            return;
+          }
+          // navigate(adminExists ? "/admin-dashboard" : "/employee-dashboard");
+        }
+      } else {
+        await handleEmployeeRegister(
+          username,
+          email,
+          password,
+          confirmPassword
+        );
         setSlide("employeeLogin");
       }
+    } catch (err) {
+      console.error("Employee Auth Error:", err);
+      setError("Login or registration failed. Please try again.");
+    }
+  };
 
-      if (slide === "adminLogin") {
+  // 🔹 Admin Submit
+  const handleAdminSubmit = async (e, mode) => {
+    e.preventDefault();
+    setError("");
+    setMessage("");
+    const { username, email, password, confirmPassword, adminCode } = formData;
+
+    try {
+      if (mode === "login") {
         const admin = await handleAdminLogin(email, password);
         if (admin) {
+          showSuccessToast("Welcome, Admin!");
           navigate("/admin-dashboard");
         }
-      }
-
-      if (slide === "adminRegister") {
+      } else {
         await handleAdminRegister(
-          name,
+          username,
           email,
           password,
           confirmPassword,
@@ -87,139 +105,101 @@ export default function AuthForm() {
         );
         setSlide("adminLogin");
       }
-
-      clearFields();
     } catch (err) {
-      console.error("Error in form submission:", err);
-      setError("Something went wrong.");
+      console.error("Admin Auth Error:", err);
+      setError("Admin login or registration failed. Please try again.");
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center ">
-      <div className="relative w-full max-w-4xl rounded-2xl overflow-hidden bg-[var(--color-bg)] text-[var(--color-text)]">
+    <>
+      <div
+        className="min-h-screen flex items-center justify-center transition-all duration-500 pb-24"
+        // style={{
+        //   background:
+        //     slide === "employeeLogin"
+        //       ? "linear-gradient(135deg, var(--color-bg) 0%, var(--color-bg-alt) 100%)"
+        //       : "linear-gradient(135deg, var(--color-leave-bg) 0%, var(--color-leave) 15%, var(--color-bg) 100%)",
+        // }}
+      >
         <div
-          className={`flex w-[400%] transition-transform duration-500 ease-in-out`}
+          className="relative w-full max-w-5xl mx-4 md:mx-8 rounded-2xl overflow-hidden   transition-all duration-500"
           style={{
-            transform:
-              slide === "employeeLogin"
-                ? "translateX(0%)"
-                : slide === "employeeRegister"
-                ? "translateX(-25%)"
-                : slide === "adminLogin"
-                ? "translateX(-50%)"
-                : "translateX(-75%)",
+            backgroundColor: "var(--color-bg)",
+            color: "var(--color-text)",
           }}
         >
-          <div className="w-1/4 py-6 flex flex-col justify-center">
-            <LoginForm
-              formData={formData}
-              handleChange={handleChange}
-              handleSubmit={handleSubmit}
-              loading={loading}
-              error={error}
-              message={message}
-            />
-            <p className="mt-4 text-center text-sm text-[var(--color-text-muted)]">
-              Don’t have an account?{" "}
-              <button
-                onClick={() => {
-                  setSlide("employeeRegister");
-                  clearFields();
-                }}
-                className="text-[var(--color-primary)] font-semibold"
-              >
-                Sign Up
-              </button>
-            </p>
-            <p
-              className="mt-2 text-center text-sm underline cursor-pointer text-[var(--color-secondary)]"
-              onClick={() => {
-                setSlide("adminLogin");
-                clearFields();
-              }}
-            >
-              Login as Admin
-            </p>
-          </div>
+          <div
+            className="flex w-[200%] transition-transform duration-700 ease-in-out"
+            style={{
+              transform:
+                slide === "employeeLogin"
+                  ? "translateX(0%)"
+                  : "translateX(-50%)",
+            }}
+          >
+            <div className="w-1/2 py-10 flex flex-col justify-center transition-all">
+              <EmployeeAuthForm
+                formData={formData}
+                setFormData={setFormData}
+                handleSubmit={handleEmployeeSubmit}
+                loading={loading}
+                error={error}
+                message={message}
+              />
+            </div>
 
-          <div className="w-1/4 py-6 flex flex-col justify-center">
-            <RegisterForm
-              formData={formData}
-              handleChange={handleChange}
-              handleSubmit={handleSubmit}
-              loading={loading}
-              error={error}
-              message={message}
-            />
-            <p className="mt-4 text-center text-sm text-[var(--color-text-muted)]">
-              Already have an account?{" "}
-              <button
-                onClick={() => {
-                  setSlide("employeeLogin");
-                  clearFields();
-                }}
-                className="text-[var(--color-primary)] font-semibold"
-              >
-                Log In
-              </button>
-            </p>
-            <p
-              className="mt-2 text-center text-sm underline cursor-pointer text-[var(--color-secondary)]"
-              onClick={() => {
-                setSlide("adminRegister");
-                clearFields();
-              }}
-            >
-              Register as Admin
-            </p>
-          </div>
-
-          {/* Admin Login */}
-          <div className="w-1/4 py-6 flex flex-col justify-center">
-            <AdminLogin
-              formData={formData}
-              handleChange={handleChange}
-              handleSubmit={handleSubmit}
-              error={error}
-              loading={loading}
-            />
-            <p
-              className="mt-4 text-center text-sm underline cursor-pointer text-[var(--color-secondary)]"
-              onClick={() => setSlide("employeeLogin")}
-            >
-              Back to Employee Login
-            </p>
-            <p
-              className="mt-2 text-center text-sm underline cursor-pointer text-[var(--color-secondary)]"
-              onClick={() => {
-                setSlide("adminRegister");
-                clearFields();
-              }}
-            >
-              Register as Admin
-            </p>
-          </div>
-
-          {/* Admin Register */}
-          <div className="w-1/4 py-6 flex flex-col justify-center">
-            <AdminRegisterForm
-              formData={formData}
-              handleChange={handleChange}
-              handleSubmit={handleSubmit}
-              error={error}
-              message={message}
-              loading={loading}
-            />
-            <p
-              className="mt-4 text-center text-sm underline cursor-pointer text-[var(--color-secondary)]"
-              onClick={() => setSlide("adminLogin")}
-            >
-              Back to Admin Login
-            </p>
+            <div className="w-1/2 py-10 flex flex-col justify-center transition-all">
+              <AdminAuthForm
+                formData={formData}
+                setFormData={setFormData}
+                handleSubmit={handleAdminSubmit}
+                loading={loading}
+                error={error}
+                message={message}
+              />
+            </div>
           </div>
         </div>
       </div>
-    </div>
+
+      <div
+        className="fixed bottom-0 left-0 w-full flex justify-center gap-4 py-4 backdrop-blur-lg border-t transition-all duration-300 z-50"
+        style={{
+          backgroundColor: "rgba(255,255,255,0.5)",
+          borderColor: "var(--color-border)",
+        }}
+      >
+        <button
+          onClick={() => {
+            setSlide("employeeLogin");
+            clearFields();
+          }}
+          className={`flex items-center gap-2 px-6 py-2 rounded-full font-semibold transition-all duration-300  ${
+            slide === "employeeLogin"
+              ? "bg-[var(--color-primary)] text-white scale-105"
+              : "text-[var(--color-text-muted)] hover:text-[var(--color-primary)]"
+          }`}
+        >
+          <User size={18} />
+          Employee
+        </button>
+
+        <button
+          onClick={() => {
+            setSlide("adminLogin");
+            clearFields();
+          }}
+          className={`flex items-center gap-2 px-6 py-2 rounded-full font-semibold transition-all duration-300  ${
+            slide === "adminLogin"
+              ? "bg-[var(--color-leave)] text-white scale-105"
+              : "text-[var(--color-text-muted)] hover:text-[var(--color-leave)]"
+          }`}
+        >
+          <Shield size={18} />
+          Admin
+        </button>
+      </div>
+    </>
   );
 }

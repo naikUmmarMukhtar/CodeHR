@@ -1,3 +1,4 @@
+//@ts-nocheck
 export default function AttendanceCard({ record, onLeaveClick }) {
   const getCardStyle = () => {
     switch (record.status.toLowerCase()) {

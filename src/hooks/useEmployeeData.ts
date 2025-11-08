@@ -2,9 +2,6 @@
 import { useEffect, useState } from "react";
 import { getFromFirebase } from "../api/firebaseAPI";
 
-/**
- * Fetches all team members and their attendance.
- */
 export const useEmployeesData = () => {
   const [teamMembers, setTeamMembers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -13,40 +10,47 @@ export const useEmployeesData = () => {
   useEffect(() => {
     const fetchTeamMembers = async () => {
       try {
-        const data = await getFromFirebase("/teammembers/");
-        if (!data) throw new Error("No team members found.");
+        const teamData = await getFromFirebase("/teammembers/");
+        const adminData = await getFromFirebase("/admins/");
+
+        if (!teamData && !adminData)
+          throw new Error("No team members or admins found.");
 
         const members = [];
 
-        Object.entries(data).forEach(([teamId, teamData]) => {
-          const userDetailsMap = teamData.userDetails || {};
-          const attendanceMap = teamData.attendance || {};
+        if (teamData) {
+          Object.entries(teamData).forEach(([teamId, team]) => {
+            const userDetailsMap = team.userDetails || {};
+            const attendanceMap = team.attendance || {};
 
-          Object.entries(userDetailsMap).forEach(([detailId, userDetails]) => {
-            const attendance = Object.entries(attendanceMap).map(
-              ([date, record]) => ({
-                date,
-                checkIn: record.checkIn || "--",
-                checkOut: record.checkOut || "--",
-                workDuration: record.workDuration || "00:00:00",
-                status: record.status || "Absent",
-                reason: record.reason || "",
-              })
+            Object.entries(userDetailsMap).forEach(
+              ([detailId, userDetails]) => {
+                const attendance = Object.entries(attendanceMap).map(
+                  ([date, record]) => ({
+                    date,
+                    checkIn: record.checkIn || "--",
+                    checkOut: record.checkOut || "--",
+                    workDuration: record.workDuration || "00:00:00",
+                    status: record.status || "Absent",
+                    reason: record.reason || "",
+                  })
+                );
+
+                members.push({
+                  teamId,
+                  detailId,
+                  userDetails: { ...userDetails, role: "Employee" },
+                  attendance: attendance.reverse(),
+                });
+              }
             );
-
-            members.push({
-              teamId,
-              detailId,
-              userDetails,
-              attendance: attendance.reverse(),
-            });
           });
-        });
+        }
 
         setTeamMembers(members);
       } catch (err) {
-        console.error("Error fetching team members:", err);
-        setError(err.message || "Failed to fetch team members.");
+        console.error("Error fetching members:", err);
+        setError(err.message || "Failed to fetch data.");
       } finally {
         setLoading(false);
       }

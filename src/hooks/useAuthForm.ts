@@ -1,4 +1,4 @@
-//@ts-nocheck
+// @ts-nocheck
 import { useState } from "react";
 import {
   createUserWithEmailAndPassword,
@@ -15,8 +15,7 @@ export const useAuthForm = () => {
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
 
-  console.log(error, "+++");
-
+  // 🔹 Employee Login
   const handleEmployeeLogin = async (email, password) => {
     try {
       setLoading(true);
@@ -26,27 +25,22 @@ export const useAuthForm = () => {
         password
       );
       showSuccessToast("Employee login successful!");
-      return userCredential.user;
+      return { user: userCredential.user, isAdmin: false };
     } catch (err) {
-      console.log(err, "err");
-
-      setError(firebaseErrorMessages[err.code] || "Login failed.");
+      setError(firebaseErrorMessages[err.code] || "Employee login failed.");
       return null;
     } finally {
       setLoading(false);
     }
   };
 
+  // 🔹 Employee Register
   const handleEmployeeRegister = async (
     username,
     email,
     password,
     confirmPassword
   ) => {
-    // if (password !== confirmPassword) {
-    //   setError("Passwords do not match.");
-    //   return;
-    // }
     try {
       setLoading(true);
       const userCredential = await createUserWithEmailAndPassword(
@@ -61,14 +55,17 @@ export const useAuthForm = () => {
         password,
         createdAt: new Date().toISOString(),
       });
-      setMessage("Account created successfully. Please log in.");
+      setMessage("Employee account created. Please log in.");
     } catch (err) {
-      setError(firebaseErrorMessages[err.code] || "Registration failed.");
+      setError(
+        firebaseErrorMessages[err.code] || "Employee registration failed."
+      );
     } finally {
       setLoading(false);
     }
   };
 
+  // 🔹 Admin Login
   const handleAdminLogin = async (email, password) => {
     try {
       setLoading(true);
@@ -77,19 +74,22 @@ export const useAuthForm = () => {
         email,
         password
       );
+
       const admins = await getFromFirebase("/admins/");
       const isAdmin =
         admins &&
         Object.values(admins).some(
           (admin) => admin.email.toLowerCase() === email.toLowerCase()
         );
+
       if (!isAdmin) {
         await signOut(auth);
         setError("Not authorized as admin.");
         return null;
       }
+
       showSuccessToast("Welcome, Admin!");
-      return userCredential.user;
+      return { user: userCredential.user, isAdmin: true };
     } catch (err) {
       setError(firebaseErrorMessages[err.code] || "Admin login failed.");
       return null;
@@ -98,6 +98,7 @@ export const useAuthForm = () => {
     }
   };
 
+  // 🔹 Admin Register
   const handleAdminRegister = async (
     username,
     email,
@@ -105,11 +106,6 @@ export const useAuthForm = () => {
     confirmPassword,
     adminCode
   ) => {
-    // if (password !== confirmPassword) {
-    //   setError("Passwords do not match.");
-    //   return;
-    // }
-
     const ADMIN_SECRET_CODE = "SECRET123";
     if (adminCode !== ADMIN_SECRET_CODE) {
       showErrorToast("Invalid admin code.");
@@ -128,7 +124,6 @@ export const useAuthForm = () => {
         email,
         password,
         isAdmin: true,
-
         createdAt: new Date().toISOString(),
       });
       setMessage("Admin account created. Please log in.");

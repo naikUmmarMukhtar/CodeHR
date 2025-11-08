@@ -12,12 +12,14 @@ import {
   Calendar,
   RefreshCw,
   Mail,
-  Clock,
   List,
+  Info,
 } from "lucide-react";
 
 export default function AdminDashboard() {
   const { admin, loading: adminLoading, error: adminError } = useAdminData();
+  console.log(admin, "admindata...");
+
   const {
     teamMembers,
     loading: teamLoading,
@@ -76,7 +78,7 @@ export default function AdminDashboard() {
       return { ...member, attendance: filteredAttendance };
     });
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status) => {
     switch (String(status).toLowerCase()) {
       case "leave":
         return "text-[var(--color-leave)] border-[var(--color-leave)]/20 bg-[var(--color-leave-bg)]";
@@ -129,150 +131,151 @@ export default function AdminDashboard() {
         </button>
       </header>
 
-      {/* Filters */}
-      <div className="flex flex-wrap sm:flex-nowrap gap-3 mb-6 items-center overflow-x-auto">
-        <div className="flex items-center gap-2 min-w-[160px]">
-          <Filter className="w-4 h-4 text-[var(--color-primary)]" />
-          <select
-            value={selectedUser}
-            onChange={(e) => setSelectedUser(e.target.value)}
-            className="p-2 border rounded-md border-[var(--color-border)] bg-[var(--color-bg)] text-[var(--color-text)] text-sm w-full"
-          >
-            {allNames.map((name, idx) => (
-              <option key={idx} value={name}>
-                {name}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <input
-          type="date"
-          value={startDate}
-          onChange={(e) => setStartDate(e.target.value)}
-          className="p-2 border rounded-md border-[var(--color-border)] bg-[var(--color-bg)] text-[var(--color-text)] text-sm w-full sm:w-auto"
-        />
-
-        <input
-          type="date"
-          value={endDate}
-          onChange={(e) => setEndDate(e.target.value)}
-          className="p-2 border rounded-md border-[var(--color-border)] bg-[var(--color-bg)] text-[var(--color-text)] text-sm w-full sm:w-auto"
-        />
-
-        <button
-          onClick={handleResetFilters}
-          className="flex items-center gap-2 p-2 px-4 border rounded-md font-medium border-[var(--color-border)] text-[var(--color-primary)] hover:bg-[var(--color-bg-alt)] transition-colors w-full sm:w-auto justify-center text-sm"
-        >
-          <RefreshCw className="w-4 h-4" />
-          Reset
-        </button>
-      </div>
-
-      {/* Attendance List grouped by user */}
-      <div className="space-y-4">
-        {filteredMembers.length === 0 ? (
-          <p className="text-center text-[var(--color-text-muted)]">
-            No attendance records found.
+      {filteredMembers.length === 0 ? (
+        <div className=" text-center ">
+          <p className="text-sm text-[var(--color-text-muted)] mb-3">
+            Currently, there are no employee records in the system.
           </p>
-        ) : (
-          filteredMembers.map((member, idx) => {
-            const name =
-              member.userDetails.username ||
-              member.userDetails.displayName ||
-              "Unknown";
-
-            const totals = summarize(member.attendance);
-
-            return (
-              <div
-                key={idx}
-                className="p-3 sm:p-4 rounded-lg shadow-sm border border-[var(--color-border)] bg-[var(--color-bg)]"
+        </div>
+      ) : (
+        <>
+          <div className="flex flex-wrap sm:flex-nowrap gap-3 mb-6 items-center overflow-x-auto">
+            <div className="flex items-center gap-2 min-w-[160px]">
+              <Filter className="w-4 h-4 text-[var(--color-primary)]" />
+              <select
+                value={selectedUser}
+                onChange={(e) => setSelectedUser(e.target.value)}
+                className="p-2 border rounded-md border-[var(--color-border)] bg-[var(--color-bg)] text-[var(--color-text)] text-sm w-full"
               >
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                  <div>
-                    <p className="text-base sm:text-lg font-semibold text-[var(--color-primary)]">
-                      {name}
-                    </p>
-                    <p className="text-xs sm:text-sm text-[var(--color-text-muted)]">
-                      {member.userDetails.email}
-                    </p>
-                    <p className="text-xs text-[var(--color-text-muted)] mt-1">
-                      Created:{" "}
-                      {member.userDetails.createdAt
-                        ? new Date(
-                            member.userDetails.createdAt
-                          ).toLocaleDateString()
-                        : "-"}
-                    </p>
+                {allNames.map((name, idx) => (
+                  <option key={idx} value={name}>
+                    {name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="p-2 border rounded-md border-[var(--color-border)] bg-[var(--color-bg)] text-[var(--color-text)] text-sm w-full sm:w-auto"
+            />
+
+            <input
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              className="p-2 border rounded-md border-[var(--color-border)] bg-[var(--color-bg)] text-[var(--color-text)] text-sm w-full sm:w-auto"
+            />
+
+            <button
+              onClick={handleResetFilters}
+              className="flex items-center gap-2 p-2 px-4 border rounded-md font-medium border-[var(--color-border)] text-[var(--color-primary)] hover:bg-[var(--color-bg-alt)] transition-colors w-full sm:w-auto justify-center text-sm"
+            >
+              <RefreshCw className="w-4 h-4" />
+              Reset
+            </button>
+          </div>
+
+          {/* Attendance List grouped by user */}
+          <div className="space-y-4">
+            {filteredMembers.map((member, idx) => {
+              const name =
+                member.userDetails.username ||
+                member.userDetails.displayName ||
+                "Unknown";
+              const totals = summarize(member.attendance);
+
+              return (
+                <div
+                  key={idx}
+                  className="p-3 sm:p-4 rounded-lg shadow-sm border border-[var(--color-border)] bg-[var(--color-bg)]"
+                >
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                    <div>
+                      <p className="text-base sm:text-lg font-semibold text-[var(--color-primary)]">
+                        {name}
+                      </p>
+                      <p className="text-xs sm:text-sm text-[var(--color-text-muted)]">
+                        {member.userDetails.email}
+                      </p>
+                      <p className="text-xs text-[var(--color-text-muted)] mt-1">
+                        Created:{" "}
+                        {member.userDetails.createdAt
+                          ? new Date(
+                              member.userDetails.createdAt
+                            ).toLocaleDateString()
+                          : "-"}
+                      </p>
+                    </div>
+
+                    <div className="text-xs sm:text-sm text-right w-full sm:w-auto">
+                      <div className="mb-1">
+                        Total:{" "}
+                        <span className="font-semibold">{totals.total}</span>
+                      </div>
+                      <div className="flex flex-wrap gap-2 justify-end">
+                        <span className="px-2 py-1 rounded-md border text-[var(--color-primary)]">
+                          Present: {totals.present}
+                        </span>
+                        <span className="px-2 py-1 rounded-md border text-[var(--color-leave)]">
+                          Leave: {totals.leave}
+                        </span>
+                        <span className="px-2 py-1 rounded-md border text-[var(--color-absent)]">
+                          Absent: {totals.absent}
+                        </span>
+                      </div>
+                    </div>
                   </div>
 
-                  <div className="text-xs sm:text-sm text-right w-full sm:w-auto">
-                    <div className="mb-1">
-                      Total:{" "}
-                      <span className="font-semibold">{totals.total}</span>
-                    </div>
-                    <div className="flex flex-wrap gap-2 justify-end">
-                      <span className="px-2 py-1 rounded-md border text-[var(--color-primary)]">
-                        Present: {totals.present}
-                      </span>
-                      <span className="px-2 py-1 rounded-md border text-[var(--color-leave)]">
-                        Leave: {totals.leave}
-                      </span>
-                      <span className="px-2 py-1 rounded-md border text-[var(--color-absent)]">
-                        Absent: {totals.absent}
-                      </span>
-                    </div>
-                  </div>
-                </div>
+                  <div className="mt-3 grid gap-2">
+                    {member.attendance.length === 0 ? (
+                      <p className="text-xs sm:text-sm text-[var(--color-text-muted)]">
+                        No attendance records.
+                      </p>
+                    ) : (
+                      member.attendance.map((att, i) => (
+                        <div
+                          key={i}
+                          className="flex flex-col sm:flex-row justify-between gap-2 sm:items-center p-3 rounded-md border border-[var(--color-border)] bg-[var(--color-bg-alt)] text-xs sm:text-sm"
+                        >
+                          <div className="flex items-start sm:items-center gap-2">
+                            <Calendar className="w-4 h-4 flex-shrink-0" />
+                            <div>
+                              <div className="font-medium">{att.date}</div>
+                              <div className="text-[var(--color-text-muted)]">
+                                {att.reason ? `Reason: ${att.reason}` : "—"}
+                              </div>
+                            </div>
+                          </div>
 
-                {/* Attendance rows */}
-                <div className="mt-3 grid gap-2">
-                  {member.attendance.length === 0 ? (
-                    <p className="text-xs sm:text-sm text-[var(--color-text-muted)]">
-                      No attendance records.
-                    </p>
-                  ) : (
-                    member.attendance.map((att, i) => (
-                      <div
-                        key={i}
-                        className="flex flex-col sm:flex-row justify-between gap-2 sm:items-center p-3 rounded-md border border-[var(--color-border)] bg-[var(--color-bg-alt)] text-xs sm:text-sm"
-                      >
-                        <div className="flex items-start sm:items-center gap-2">
-                          <Calendar className="w-4 h-4 flex-shrink-0" />
-                          <div>
-                            <div className="font-medium">{att.date}</div>
+                          <div className="text-right">
+                            <div
+                              className={`inline-flex items-center gap-2 px-2 py-1 rounded-md text-xs font-semibold ${getStatusColor(
+                                att.status
+                              )}`}
+                            >
+                              {att.status}
+                            </div>
+                            <div className="mt-1 text-[var(--color-text-muted)]">
+                              In: {att.checkIn || "--"} • Out:{" "}
+                              {att.checkOut || "--"}
+                            </div>
                             <div className="text-[var(--color-text-muted)]">
-                              {att.reason ? `Reason: ${att.reason}` : "—"}
+                              Duration: {att.workDuration || "00:00:00"}
                             </div>
                           </div>
                         </div>
-
-                        <div className="text-right">
-                          <div
-                            className={`inline-flex items-center gap-2 px-2 py-1 rounded-md text-xs font-semibold ${getStatusColor(
-                              att.status
-                            )}`}
-                          >
-                            {att.status}
-                          </div>
-                          <div className="mt-1 text-[var(--color-text-muted)]">
-                            In: {att.checkIn || "--"} • Out:{" "}
-                            {att.checkOut || "--"}
-                          </div>
-                          <div className="text-[var(--color-text-muted)]">
-                            Duration: {att.workDuration || "00:00:00"}
-                          </div>
-                        </div>
-                      </div>
-                    ))
-                  )}
+                      ))
+                    )}
+                  </div>
                 </div>
-              </div>
-            );
-          })
-        )}
-      </div>
+              );
+            })}
+          </div>
+        </>
+      )}
     </div>
   );
 }

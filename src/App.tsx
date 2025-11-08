@@ -16,43 +16,20 @@ import AdminDashboard from "./pages/AdminDashboard";
 import { useAuth } from "./hooks/useAuth";
 import { useHolidayCheck } from "./hooks/useHolidayCheck";
 import { getFromFirebase } from "./api/firebaseAPI";
-
 function App() {
   const isHoliday = useHolidayCheck();
   const { user, loading } = useAuth();
   const navigate = useNavigate();
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [checkingAdmin, setCheckingAdmin] = useState(true);
 
-  useEffect(() => {
-    const checkAdminStatus = async () => {
-      try {
-        const admins = await getFromFirebase("/admins/");
-        const hasAdmin = admins
-          ? Object.values(admins).some((admin) => admin.isAdmin === true)
-          : false;
-
-        setIsAdmin(hasAdmin);
-      } catch (err) {
-        console.error("Error checking admin:", err);
-      }
-      setCheckingAdmin(false);
-    };
-
-    checkAdminStatus();
-  }, []);
-
-  if (loading || checkingAdmin) return <Loader />;
-
-  // if (isHoliday) return <HolidayPage />;
-
+  if (loading) return <Loader />;
   if (!user) return <MobileAuthForm />;
+  // if (isHoliday) return <HolidayPage />;
 
   return (
     <>
       <ScrollToTop />
       <Routes>
-        {isAdmin ? (
+        {user.isAdmin ? (
           <>
             <Route path="/" element={<AdminDashboard />} />
             <Route path="/admin-dashboard" element={<AdminDashboard />} />
@@ -73,9 +50,8 @@ function App() {
         )}
       </Routes>
 
-      {!isAdmin && <MobileNav />}
+      {!user.isAdmin && <MobileNav />}
     </>
   );
 }
-
 export default App;

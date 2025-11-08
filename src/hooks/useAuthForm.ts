@@ -127,6 +127,8 @@ export const useAuthForm = () => {
         username,
         email,
         password,
+        isAdmin: true,
+
         createdAt: new Date().toISOString(),
       });
       setMessage("Admin account created. Please log in.");

@@ -26,23 +26,21 @@ function App() {
 
   useEffect(() => {
     const checkAdminStatus = async () => {
-      if (user && user.email) {
-        try {
-          const admins = await getFromFirebase("/admins/");
-          const adminExists = admins
-            ? Object.values(admins).some((admin) => admin.email === user.email)
-            : false;
+      try {
+        const admins = await getFromFirebase("/admins/");
+        const hasAdmin = admins
+          ? Object.values(admins).some((admin) => admin.isAdmin === true)
+          : false;
 
-          setIsAdmin(adminExists);
-        } catch (err) {
-          console.error("Error checking admin:", err);
-        }
+        setIsAdmin(hasAdmin);
+      } catch (err) {
+        console.error("Error checking admin:", err);
       }
       setCheckingAdmin(false);
     };
 
     checkAdminStatus();
-  }, [user]);
+  }, []);
 
   if (loading || checkingAdmin) return <Loader />;
 

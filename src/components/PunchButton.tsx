@@ -24,7 +24,9 @@ export default function PunchButton({
     if (!uid) return;
     const todayKey = new Date().toLocaleDateString("en-CA");
     try {
-      const record = await getFromFirebase(`${uid}/attendance/${todayKey}`);
+      const record = await getFromFirebase(
+        `/teammembers/${uid}/attendance/${todayKey}`
+      );
       setLastCheckedDate(todayKey);
 
       if (!record) {

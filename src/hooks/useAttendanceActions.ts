@@ -126,7 +126,7 @@ export function useAttendanceActions(setIsCheckedIn) {
       const totalSeconds = calculateWorkDuration(checkInTime, timeOnly);
       const formattedDuration = formatWorkTime(totalSeconds);
 
-      await putToFirebase(`${userId}/attendance/${today}`, {
+      await putToFirebase(`/teammembers/${userId}/attendance/${today}`, {
         checkIn: checkInTime,
         checkOut: timeOnly,
         workDuration: formattedDuration,

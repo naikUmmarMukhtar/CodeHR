@@ -67,7 +67,7 @@ export const useAuthForm = () => {
       });
 
       await sendEmailVerification(user, {
-        url: "https://codestrixhrm.netlify.app/",
+        url: "https://hrm.codestrix.in/",
       });
 
       await signOut(auth);
@@ -146,7 +146,7 @@ export const useAuthForm = () => {
 
       // Send verification email
       await sendEmailVerification(user, {
-        url: "https://codestrixhrm.netlify.app/",
+        url: "https://hrm.codestrix.in/",
       });
 
       // Sign out until verified

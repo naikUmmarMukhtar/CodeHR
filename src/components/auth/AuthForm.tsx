@@ -6,10 +6,13 @@ import AdminAuthForm from "./AdminAuthForm";
 import EmployeeAuthForm from "./EmployeeAuthForm";
 import { showErrorToast, showSuccessToast } from "../../utils/toastMessage";
 import { useAuthForm } from "../../hooks/useAuthForm";
-import { checkIfAdmin, checkIfEmployee } from "../../utils/checkUserType"; // ✅ import here
+import { checkIfAdmin, checkIfEmployee } from "../../utils/checkUserType";
 
 export default function AuthForm() {
-  const [adminSlide, setAdminSlide] = useState(true);
+  const [adminSlide, setAdminSlide] = useState(false);
+  const [switchToEmployeeLogin, setSwitchToEmployeeLogin] = useState(false);
+  const [switchToAdminLogin, setSwitchToAdminLogin] = useState(false); // ✅ new
+
   const [formData, setFormData] = useState({
     isAdmin: false,
     username: "",
@@ -46,7 +49,7 @@ export default function AuthForm() {
     setMessage("");
   };
 
-  // 🔹 Employee Auth
+  // 🔹 Employee Submit
   const handleEmployeeSubmit = async (e, mode) => {
     e.preventDefault();
     setError("");
@@ -54,7 +57,7 @@ export default function AuthForm() {
     const { username, email, password, confirmPassword } = formData;
 
     try {
-      const isAdmin = await checkIfAdmin(email); // ✅ uses helper
+      const isAdmin = await checkIfAdmin(email);
       if (isAdmin) {
         showErrorToast("This is an admin account. Please use admin login.");
         return;
@@ -63,18 +66,22 @@ export default function AuthForm() {
       if (mode === "login") {
         const user = await handleEmployeeLogin(email, password);
         if (user) {
-          showSuccessToast("Welcome back!");
-          navigate("/employee-dashboard");
+          showSuccessToast("Logged in successfully!");
         }
       } else {
-        await handleEmployeeRegister(
+        const res = await handleEmployeeRegister(
           username,
           email,
           password,
           confirmPassword
         );
-        setAdminSlide(false);
-        showSuccessToast("Registration successful! Please login.");
+
+        if (res?.status === "registered") {
+          showSuccessToast(
+            "Registration successful! Please verify your email."
+          );
+          setSwitchToEmployeeLogin(true); // ✅ Switch employee form to login
+        }
       }
     } catch (err) {
       console.error("Employee Auth Error:", err);
@@ -82,7 +89,7 @@ export default function AuthForm() {
     }
   };
 
-  // 🔹 Admin Auth
+  // 🔹 Admin Submit
   const handleAdminSubmit = async (e, mode) => {
     e.preventDefault();
     setError("");
@@ -90,7 +97,7 @@ export default function AuthForm() {
     const { username, email, password, confirmPassword, adminCode } = formData;
 
     try {
-      const isEmployee = await checkIfEmployee(email); // ✅ uses helper
+      const isEmployee = await checkIfEmployee(email);
       if (isEmployee) {
         showErrorToast(
           "This is an employee account. Please use employee login."
@@ -99,21 +106,23 @@ export default function AuthForm() {
       }
 
       if (mode === "login") {
-        const admin = await handleAdminLogin(email, password);
-        if (admin) {
-          showSuccessToast("Welcome back, Admin!");
-          navigate("/admin-dashboard");
+        const user = await handleAdminLogin(email, password);
+        if (user) {
+          showSuccessToast("Logged in successfully!");
         }
       } else {
-        await handleAdminRegister(
+        const res = await handleAdminRegister(
           username,
           email,
           password,
           confirmPassword,
           adminCode
         );
-        setAdminSlide(true);
-        showSuccessToast("Admin registration successful! Please login.");
+
+        if (res?.status === "registered") {
+          showSuccessToast("Admin registration successful! Please log in.");
+          setSwitchToAdminLogin(true); // ✅ Switch admin form to login
+        }
       }
     } catch (err) {
       console.error("Admin Auth Error:", err);
@@ -121,12 +130,12 @@ export default function AuthForm() {
     }
   };
 
-  // 🔹 Toggle between admin/employee forms
   const toggleMode = (isAdmin) => {
     setAdminSlide(isAdmin);
     clearFields();
     setFormData((prev) => ({ ...prev, isAdmin }));
   };
+
   return (
     <>
       <div className="min-h-screen flex items-center justify-center transition-all duration-500 pb-24">
@@ -152,6 +161,8 @@ export default function AuthForm() {
                 loading={loading}
                 error={error}
                 message={message}
+                switchToLogin={switchToEmployeeLogin}
+                onSwitchedToLogin={() => setSwitchToEmployeeLogin(false)}
               />
             </div>
 
@@ -164,13 +175,15 @@ export default function AuthForm() {
                 loading={loading}
                 error={error}
                 message={message}
+                switchToLogin={switchToAdminLogin} // ✅ new prop
+                onSwitchedToLogin={() => setSwitchToAdminLogin(false)} // ✅ reset
               />
             </div>
           </div>
         </div>
       </div>
 
-      {/* Switch Buttons */}
+      {/* Bottom Switch */}
       <div
         className="fixed bottom-0 left-0 w-full flex justify-center gap-4 py-4 backdrop-blur-lg border-t transition-all duration-300 z-50"
         style={{

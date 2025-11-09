@@ -136,21 +136,16 @@ export default function ProfilePage() {
         style={{ borderColor: "var(--color-border)" }}
       />
       <div>
-        <div className="flex justify-between items-center mb-3">
+        {/* <div className="flex justify-between items-center mb-3">
           <h3 className="font-semibold">Contact Info</h3>
           <Edit2
             size={16}
             style={{ color: "var(--color-text-muted)" }}
             className="cursor-pointer"
           />
-        </div>
+        </div> */}
 
         <div className="space-y-3">
-          <div className="flex items-center gap-2">
-            <Phone size={16} style={{ color: "var(--color-secondary)" }} />
-            <span>{profile.phone}</span>
-          </div>
-
           <div className="flex items-center gap-2">
             <Mail size={16} style={{ color: "var(--color-secondary)" }} />
             <span>{profile.email}</span>

@@ -1,5 +1,5 @@
-// @ts-nocheck
-import { useState } from "react";
+//@ts-nocheck
+import { useState, useEffect } from "react";
 import { AlertTriangle } from "lucide-react";
 import { useIsMobile } from "../../hooks/useIsMobile";
 import { useRegisterValidation } from "../../hooks/useRegisterValidation";
@@ -15,23 +15,14 @@ export default function EmployeeAuthForm({
   loading,
   error,
   message,
-}: {
-  formData: any;
-  setFormData: React.Dispatch<React.SetStateAction<any>>;
-  handleSubmit: (
-    e: React.FormEvent<HTMLFormElement>,
-    mode: "login" | "register"
-  ) => void;
-  loading: boolean;
-  error?: string;
-  message?: string;
+  switchToLogin, // ✅ new prop
+  onSwitchedToLogin, // ✅ callback to reset
 }) {
-  const [mode, setMode] = useState<"login" | "register">("login"); // default = login
+  const [mode, setMode] = useState<"login" | "register">("login");
   const isRegister = mode === "register";
   const [submitted, setSubmitted] = useState(false);
   const isMobile = useIsMobile();
 
-  // Hooks
   const { errors: registerErrors } = useRegisterValidation(formData);
   const {
     errors: loginErrors,
@@ -39,20 +30,26 @@ export default function EmployeeAuthForm({
     resetValidation,
   } = useLoginValidation();
 
-  // Determine if any register errors exist
   const hasRegisterErrors =
     submitted && isRegister && Object.keys(registerErrors).length > 0;
 
-  // 🔹 Submit handler
+  // ✅ Automatically switch to login mode when registration completes
+  useEffect(() => {
+    if (switchToLogin && isRegister) {
+      setMode("login");
+      onSwitchedToLogin?.();
+      resetValidation();
+      setSubmitted(false);
+    }
+  }, [switchToLogin]);
+
   const onSubmit = (e) => {
     e.preventDefault();
     setSubmitted(true);
 
     if (isRegister) {
-      // Registration validation
       if (Object.keys(registerErrors).length > 0) return;
     } else {
-      // Login validation
       const loginErrs = validateLogin(formData);
       if (Object.keys(loginErrs).length > 0) return;
     }
@@ -60,14 +57,12 @@ export default function EmployeeAuthForm({
     handleSubmit(e, mode);
   };
 
-  // 🔹 Switch between Login / Register
   const toggleMode = () => {
     setSubmitted(false);
     resetValidation();
     setMode(isRegister ? "login" : "register");
   };
 
-  // 🔹 Controlled inputs
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));

@@ -19,10 +19,13 @@ import { getFromFirebase } from "./api/firebaseAPI";
 function App() {
   const isHoliday = useHolidayCheck();
   const { user, loading } = useAuth();
+  console.log(user, "user is ");
+
   const navigate = useNavigate();
 
   if (loading) return <Loader />;
-  if (!user) return <MobileAuthForm />;
+  // if (!user || !user.emailVerified) return <MobileAuthForm />;
+  if (!user || !user.emailVerified) return <MobileAuthForm />;
   // if (isHoliday) return <HolidayPage />;
 
   return (

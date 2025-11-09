@@ -2,13 +2,14 @@
 import { useState } from "react";
 import {
   createUserWithEmailAndPassword,
+  sendEmailVerification,
   signInWithEmailAndPassword,
   signOut,
 } from "firebase/auth";
 import { auth } from "../firebase/config";
 import { showErrorToast, showSuccessToast } from "../utils/toastMessage";
 import firebaseErrorMessages from "../utils/firebaseErrorMessages";
-import { getFromFirebase, postToFirebase } from "../api/firebaseAPI";
+import { postToFirebase } from "../api/firebaseAPI";
 
 export const useAuthForm = () => {
   const [loading, setLoading] = useState(false);
@@ -19,13 +20,21 @@ export const useAuthForm = () => {
   const handleEmployeeLogin = async (email, password) => {
     try {
       setLoading(true);
+
       const userCredential = await signInWithEmailAndPassword(
         auth,
         email,
         password
       );
-      showSuccessToast("Employee login successful!");
-      return { user: userCredential.user, isAdmin: false };
+      const user = userCredential.user;
+
+      if (!user.emailVerified) {
+        setError("Please verify your email before logging in.");
+        await signOut(auth);
+        return null;
+      }
+
+      return { user };
     } catch (err) {
       setError(firebaseErrorMessages[err.code] || "Employee login failed.");
       return null;
@@ -34,7 +43,6 @@ export const useAuthForm = () => {
     }
   };
 
-  // 🔹 Employee Register
   const handleEmployeeRegister = async (
     username,
     email,
@@ -43,20 +51,33 @@ export const useAuthForm = () => {
   ) => {
     try {
       setLoading(true);
+
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         email,
         password
       );
-      const uid = userCredential.user.uid;
-      await postToFirebase(`/teammembers/${uid}/userDetails`, {
+      const user = userCredential.user;
+
+      await postToFirebase(`/teammembers/${user.uid}/userDetails`, {
         username,
         email,
         password,
         createdAt: new Date().toISOString(),
       });
-      setMessage("Employee account created. Please log in.");
+
+      await sendEmailVerification(user, {
+        url: "https://codestrixhrm.netlify.app/",
+      });
+
+      await signOut(auth);
+
+      setMessage(
+        "Verification email sent. Please check your inbox before logging in."
+      );
+      return { status: "registered" };
     } catch (err) {
+      console.error("Employee registration error:", err);
       setError(
         firebaseErrorMessages[err.code] || "Employee registration failed."
       );
@@ -69,27 +90,21 @@ export const useAuthForm = () => {
   const handleAdminLogin = async (email, password) => {
     try {
       setLoading(true);
+
       const userCredential = await signInWithEmailAndPassword(
         auth,
         email,
         password
       );
+      const user = userCredential.user;
 
-      const admins = await getFromFirebase("/admins/");
-      const isAdmin =
-        admins &&
-        Object.values(admins).some(
-          (admin) => admin.email.toLowerCase() === email.toLowerCase()
-        );
-
-      if (!isAdmin) {
+      if (!user.emailVerified) {
+        setError("Please verify your email before logging in.");
         await signOut(auth);
-        setError("Not authorized as admin.");
         return null;
       }
 
-      showSuccessToast("Welcome, Admin!");
-      return { user: userCredential.user, isAdmin: true };
+      return { user };
     } catch (err) {
       setError(firebaseErrorMessages[err.code] || "Admin login failed.");
       return null;
@@ -114,20 +129,41 @@ export const useAuthForm = () => {
 
     try {
       setLoading(true);
+
+      if (password !== confirmPassword) {
+        setError("Passwords do not match.");
+        return;
+      }
+
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         email,
         password
       );
+      const user = userCredential.user;
+
+      // Save admin data
       await postToFirebase("/admins/", {
         username,
         email,
         password,
-        isAdmin: true,
         createdAt: new Date().toISOString(),
       });
-      setMessage("Admin account created. Please log in.");
+
+      // Send verification email
+      await sendEmailVerification(user, {
+        url: "https://codestrixhrm.netlify.app/",
+      });
+
+      // Sign out until verified
+      await signOut(auth);
+
+      setMessage(
+        "Verification email sent. Please check your inbox before logging in."
+      );
+      return { status: "registered" };
     } catch (err) {
+      console.error("Admin registration error:", err);
       setError(firebaseErrorMessages[err.code] || "Admin registration failed.");
     } finally {
       setLoading(false);

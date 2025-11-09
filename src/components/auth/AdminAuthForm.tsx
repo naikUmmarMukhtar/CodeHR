@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useIsMobile } from "../../hooks/useIsMobile";
 import { AlertTriangle } from "lucide-react";
 import { useRegisterValidation } from "../../hooks/useRegisterValidation";
@@ -15,6 +15,8 @@ export default function AdminAuthForm({
   loading,
   error,
   message,
+  switchToLogin, // ✅ new
+  onSwitchedToLogin, // ✅ new
 }: {
   formData: any;
   setFormData: React.Dispatch<React.SetStateAction<any>>;
@@ -30,6 +32,14 @@ export default function AdminAuthForm({
   const [submitted, setSubmitted] = useState(false);
   const isRegister = mode === "register";
   const isMobile = useIsMobile();
+
+  useEffect(() => {
+    if (switchToLogin) {
+      setMode("login");
+      setSubmitted(false);
+      onSwitchedToLogin?.(); // reset flag
+    }
+  }, [switchToLogin]);
 
   // ✅ Hooks for validation
   const { errors: registerErrors } = useRegisterValidation(formData);

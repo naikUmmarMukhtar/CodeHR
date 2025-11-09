@@ -18,7 +18,7 @@ export function useAuth() {
           if (admins) {
             const adminList = Object.values(admins);
             isAdmin = adminList.some(
-              (admin) => admin.email === firebaseUser.email && admin.isAdmin
+              (admin) => admin.email === firebaseUser.email
             );
           }
 

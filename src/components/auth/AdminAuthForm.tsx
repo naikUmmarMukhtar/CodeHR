@@ -168,7 +168,7 @@ export default function AdminAuthForm({
               />
 
               <FormInput
-                label="Admin Secret Code"
+                label="Admin Code"
                 name="adminCode"
                 type="text"
                 value={formData.adminCode}

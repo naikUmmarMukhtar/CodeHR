@@ -121,12 +121,6 @@ export const useAuthForm = () => {
     confirmPassword,
     adminCode
   ) => {
-    const ADMIN_SECRET_CODE = "SECRET123";
-    if (adminCode !== ADMIN_SECRET_CODE) {
-      showErrorToast("Invalid admin code.");
-      return;
-    }
-
     try {
       setLoading(true);
 

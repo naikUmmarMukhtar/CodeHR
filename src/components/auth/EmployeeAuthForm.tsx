@@ -148,15 +148,27 @@ export default function EmployeeAuthForm({
 
           {/* Confirm Password (Register only) */}
           {isRegister && (
-            <FormInput
-              label="Confirm Password"
-              name="confirmPassword"
-              type="password"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              error={submitted ? registerErrors.confirmPassword : ""}
-              required
-            />
+            <>
+              <FormInput
+                label="Confirm Password"
+                name="confirmPassword"
+                type="password"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                error={submitted ? registerErrors.confirmPassword : ""}
+                required
+              />
+
+              <FormInput
+                label="Employee Code"
+                name="empCode"
+                type="text"
+                value={formData.empCode}
+                onChange={handleChange}
+                error={submitted ? registerErrors.empCode : ""}
+                required
+              />
+            </>
           )}
         </div>
 

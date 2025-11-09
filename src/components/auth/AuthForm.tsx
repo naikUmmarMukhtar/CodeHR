@@ -7,6 +7,7 @@ import EmployeeAuthForm from "./EmployeeAuthForm";
 import { showErrorToast, showSuccessToast } from "../../utils/toastMessage";
 import { useAuthForm } from "../../hooks/useAuthForm";
 import { checkIfAdmin, checkIfEmployee } from "../../utils/checkUserType";
+import { ADMIN_CODE, EMP_CODE } from "../../lib/constants";
 
 export default function AuthForm() {
   const [adminSlide, setAdminSlide] = useState(false);
@@ -54,7 +55,11 @@ export default function AuthForm() {
     e.preventDefault();
     setError("");
     setMessage("");
-    const { username, email, password, confirmPassword } = formData;
+    const { username, email, password, confirmPassword, empCode } = formData;
+    if (mode == "register" && empCode !== EMP_CODE) {
+      showErrorToast("Invalid Employee Code");
+      return;
+    }
 
     try {
       const isAdmin = await checkIfAdmin(email);
@@ -95,6 +100,10 @@ export default function AuthForm() {
     setError("");
     setMessage("");
     const { username, email, password, confirmPassword, adminCode } = formData;
+    if (mode == "register" && adminCode !== ADMIN_CODE) {
+      showErrorToast("Invalid Admin Code");
+      return;
+    }
 
     try {
       const isEmployee = await checkIfEmployee(email);

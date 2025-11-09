@@ -16,17 +16,19 @@ import AdminDashboard from "./pages/AdminDashboard";
 import { useAuth } from "./hooks/useAuth";
 import { useHolidayCheck } from "./hooks/useHolidayCheck";
 import { getFromFirebase } from "./api/firebaseAPI";
+import { useDeviceCheck } from "./hooks/useDeviceCheck";
+import MobileOnlyPage from "./pages/MobileOnlyPage";
 function App() {
   const isHoliday = useHolidayCheck();
   const { user, loading } = useAuth();
-  console.log(user, "user is ");
+  const isMobileDevice = useDeviceCheck();
 
   const navigate = useNavigate();
-
+  if (isMobileDevice) return <MobileOnlyPage />;
+  // if (isHoliday) return <HolidayPage />;
   if (loading) return <Loader />;
   // if (!user || !user.emailVerified) return <MobileAuthForm />;
   if (!user || !user.emailVerified) return <MobileAuthForm />;
-  // if (isHoliday) return <HolidayPage />;
 
   return (
     <>

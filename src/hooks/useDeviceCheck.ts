@@ -39,5 +39,5 @@ export const useDeviceCheck = () => {
     checkPlatform();
   }, []);
 
-  return isMobileDevice;
+  return { isMobileDevice };
 };

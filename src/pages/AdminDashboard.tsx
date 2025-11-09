@@ -1,25 +1,16 @@
 // @ts-nocheck
 import { useState } from "react";
+import Loader from "../components/shared/Loader";
 import { useAdminData } from "../hooks/useAdminData";
 import { useEmployeesData } from "../hooks/useEmployeeData";
-import Loader from "../components/shared/Loader";
-import { showErrorToast, showSuccessToast } from "../utils/toastMessage";
+import AdminHeader from "../components/AdminHeader";
+import EmployeeList from "../components/EmployeeList";
+import DashboardFilters from "../components/DashboardFilters";
 import { getAuth, signOut } from "firebase/auth";
-import {
-  LogOut,
-  Filter,
-  User,
-  Calendar,
-  RefreshCw,
-  Mail,
-  List,
-  Info,
-} from "lucide-react";
+import { showErrorToast, showSuccessToast } from "../utils/toastMessage";
 
 export default function AdminDashboard() {
   const { admin, loading: adminLoading, error: adminError } = useAdminData();
-  console.log(admin, "admindata...");
-
   const {
     teamMembers,
     loading: teamLoading,
@@ -27,8 +18,9 @@ export default function AdminDashboard() {
   } = useEmployeesData();
 
   const [selectedUser, setSelectedUser] = useState("All");
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
+  const [dateRange, setDateRange] = useState([
+    { startDate: null, endDate: null, key: "selection" },
+  ]);
 
   if (adminLoading || teamLoading) return <Loader />;
   if (adminError) return <p className="text-(--color-absent)">{adminError}</p>;
@@ -44,18 +36,11 @@ export default function AdminDashboard() {
 
   const handleResetFilters = () => {
     setSelectedUser("All");
-    setStartDate("");
-    setEndDate("");
+    setDateRange([{ startDate: null, endDate: null, key: "selection" }]);
   };
 
-  const handleLogout = async () => {
-    try {
-      await signOut(getAuth());
-      showSuccessToast("Logged out successfully.");
-    } catch {
-      showErrorToast("Logout failed. Please try again.");
-    }
-  };
+  const startDate = dateRange[0].startDate;
+  const endDate = dateRange[0].endDate;
 
   const filteredMembers = teamMembers
     .filter(
@@ -67,25 +52,12 @@ export default function AdminDashboard() {
     .map((member) => {
       const filteredAttendance = member.attendance.filter((att) => {
         const attDate = new Date(att.date);
-        const start = startDate ? new Date(startDate) : null;
-        const end = endDate ? new Date(endDate) : null;
-        if (start && attDate < start) return false;
-        if (end && attDate > end) return false;
+        if (startDate && attDate < startDate) return false;
+        if (endDate && attDate > endDate) return false;
         return true;
       });
       return { ...member, attendance: filteredAttendance };
     });
-
-  const getStatusColor = (status) => {
-    switch (String(status).toLowerCase()) {
-      case "leave":
-        return "text-(--color-leave) border-(--color-leave)/20 bg-(--color-leave-bg)";
-      case "absent":
-        return "text-(--color-absent) border-(--color-absent)/20 bg-(--color-absent-bg)";
-      default:
-        return "text-(--color-primary) border-(--color-primary)/20 bg-(--color-bg)";
-    }
-  };
 
   const summarize = (attendance = []) => {
     const totals = {
@@ -96,184 +68,50 @@ export default function AdminDashboard() {
     };
     attendance.forEach((a) => {
       const s = String(a.status || "").toLowerCase();
-      if (s === "leave") totals.leave += 1;
-      else if (s === "absent") totals.absent += 1;
-      else totals.present += 1;
+      if (s === "leave") totals.leave++;
+      else if (s === "absent") totals.absent++;
+      else totals.present++;
     });
     return totals;
   };
 
+  const getStatusColor = (status) => {
+    switch (String(status).toLowerCase()) {
+      case "leave":
+        return "text-(--color-leave)";
+      case "absent":
+        return "text-(--color-absent)";
+      default:
+        return "text-(--color-primary)";
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await signOut(getAuth());
+      showSuccessToast("Logged out successfully.");
+    } catch {
+      showErrorToast("Logout failed. Please try again.");
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-(--color-bg) text-(--color-text) px-4 sm:px-6 py-4 sm:py-6">
-      {/* Header */}
-      <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center pb-4 mb-6">
-        <div className="space-y-1">
-          <h1 className="text-xl sm:text-2xl font-semibold flex items-center gap-2 text-(--color-primary)">
-            <List className="w-5 h-5 text-(--color-primary)" />
-            Admin Dashboard
-          </h1>
-          <p className="text-xs sm:text-sm text-(--color-text-muted) flex flex-wrap items-center gap-2">
-            <User className="w-4 h-4" /> {admin.username} •{" "}
-            <Mail className="w-4 h-4" /> {admin.email} •{" "}
-            <Calendar className="w-4 h-4" />{" "}
-            {new Date(admin.createdAt).toLocaleDateString()}
-          </p>
-        </div>
-
-        <button
-          onClick={handleLogout}
-          className="mt-4 sm:mt-0 flex items-center gap-2 px-4 py-2 text-xs sm:text-sm font-medium border rounded-md border-(--color-border) hover:bg-(--color-bg-alt) transition-colors w-full sm:w-auto justify-center"
-        >
-          <LogOut className="w-4 h-4 text-(--color-primary)" />
-          Logout
-        </button>
-      </header>
-
-      {filteredMembers.length === 0 ? (
-        <div className=" text-center ">
-          <p className="text-sm text-(--color-text-muted) mb-3">
-            Currently, there are no employee records in the system.
-          </p>
-        </div>
-      ) : (
-        <>
-          <div className="flex flex-wrap sm:flex-nowrap gap-3 mb-6 items-center overflow-x-auto">
-            <div className="flex items-center gap-2 min-w-[160px]">
-              <Filter className="w-4 h-4 text-(--color-primary)" />
-              <select
-                value={selectedUser}
-                onChange={(e) => setSelectedUser(e.target.value)}
-                className="p-2 border rounded-md border-(--color-border) bg-(--color-bg) text-(--color-text) text-sm w-full"
-              >
-                {allNames.map((name, idx) => (
-                  <option key={idx} value={name}>
-                    {name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <input
-              type="date"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-              className="p-2 border rounded-md border-(--color-border) bg-(--color-bg) text-(--color-text) text-sm w-full sm:w-auto"
-            />
-
-            <input
-              type="date"
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-              className="p-2 border rounded-md border-(--color-border) bg-(--color-bg) text-(--color-text) text-sm w-full sm:w-auto"
-            />
-
-            <button
-              onClick={handleResetFilters}
-              className="flex items-center gap-2 p-2 px-4 border rounded-md font-medium border-(--color-border) text-(--color-primary) hover:bg-(--color-bg-alt) transition-colors w-full sm:w-auto justify-center text-sm"
-            >
-              <RefreshCw className="w-4 h-4" />
-              Reset
-            </button>
-          </div>
-
-          {/* Attendance List grouped by user */}
-          <div className="space-y-4">
-            {filteredMembers.map((member, idx) => {
-              const name =
-                member.userDetails.username ||
-                member.userDetails.displayName ||
-                "Unknown";
-              const totals = summarize(member.attendance);
-
-              return (
-                <div
-                  key={idx}
-                  className="p-3 sm:p-4 rounded-lg shadow-sm border border-(--color-border) bg-(--color-bg)"
-                >
-                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                    <div>
-                      <p className="text-base sm:text-lg font-semibold text-(--color-primary)">
-                        {name}
-                      </p>
-                      <p className="text-xs sm:text-sm text-(--color-text-muted)">
-                        {member.userDetails.email}
-                      </p>
-                      <p className="text-xs text-(--color-text-muted) mt-1">
-                        Created:{" "}
-                        {member.userDetails.createdAt
-                          ? new Date(
-                              member.userDetails.createdAt
-                            ).toLocaleDateString()
-                          : "-"}
-                      </p>
-                    </div>
-
-                    <div className="text-xs sm:text-sm text-right w-full sm:w-auto">
-                      <div className="mb-1">
-                        Total:{" "}
-                        <span className="font-semibold">{totals.total}</span>
-                      </div>
-                      <div className="flex flex-wrap gap-2 justify-end">
-                        <span className="px-2 py-1 rounded-md border text-(--color-primary)">
-                          Present: {totals.present}
-                        </span>
-                        <span className="px-2 py-1 rounded-md border text-(--color-leave)">
-                          Leave: {totals.leave}
-                        </span>
-                        <span className="px-2 py-1 rounded-md border text-(--color-absent)">
-                          Absent: {totals.absent}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="mt-3 grid gap-2">
-                    {member.attendance.length === 0 ? (
-                      <p className="text-xs sm:text-sm text-(--color-text-muted)">
-                        No attendance records.
-                      </p>
-                    ) : (
-                      member.attendance.map((att, i) => (
-                        <div
-                          key={i}
-                          className="flex flex-col sm:flex-row justify-between gap-2 sm:items-center p-3 rounded-md border border-(--color-border) bg-(--color-bg-alt) text-xs sm:text-sm"
-                        >
-                          <div className="flex items-start sm:items-center gap-2">
-                            <Calendar className="w-4 h-4 flex-shrink-0" />
-                            <div>
-                              <div className="font-medium">{att.date}</div>
-                              <div className="text-(--color-text-muted)">
-                                {att.reason ? `Reason: ${att.reason}` : "—"}
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="text-right">
-                            <div
-                              className={`inline-flex items-center gap-2 px-2 py-1 rounded-md text-xs font-semibold ${getStatusColor(
-                                att.status
-                              )}`}
-                            >
-                              {att.status}
-                            </div>
-                            <div className="mt-1 text-(--color-text-muted)">
-                              In: {att.checkIn || "--"} • Out:{" "}
-                              {att.checkOut || "--"}
-                            </div>
-                            <div className="text-(--color-text-muted)">
-                              Duration: {att.workDuration || "00:00:00"}
-                            </div>
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </>
-      )}
+    <div className="min-h-screen bg-(--color-bg) text-(--color-text) px-4 py-4 sm:px-8 sm:py-6">
+      <AdminHeader admin={admin} />
+      <DashboardFilters
+        selectedUser={selectedUser}
+        setSelectedUser={setSelectedUser}
+        allNames={allNames}
+        dateRange={dateRange}
+        setDateRange={setDateRange}
+        onReset={handleResetFilters}
+        onLogout={handleLogout}
+      />
+      <EmployeeList
+        filteredMembers={filteredMembers}
+        getStatusColor={getStatusColor}
+        summarize={summarize}
+      />
     </div>
   );
 }

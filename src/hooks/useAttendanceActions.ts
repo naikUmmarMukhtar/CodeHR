@@ -1,6 +1,11 @@
 // @ts-nocheck
 import { getAuth } from "firebase/auth";
-import { CHECKIN_END, CHECKIN_START, CHECKOUT_MIN } from "../lib/constants";
+import {
+  CHECKIN_END,
+  CHECKIN_START,
+  CHECKOUT_MAX,
+  CHECKOUT_MIN,
+} from "../lib/constants";
 import {
   getFromFirebase,
   postToFirebase,
@@ -65,7 +70,14 @@ export function useAttendanceActions(setIsCheckedIn) {
     const timeOnly = getTimeNow();
 
     try {
-      // ⚠️ Warn if check-in is after 10:15 AM
+      if (
+        now.getHours() < CHECKIN_START.hour ||
+        (now.getHours() === CHECKIN_START.hour &&
+          now.getMinutes() < CHECKIN_START.minute)
+      ) {
+        showErrorToast("Check-in not allowed before 9:15 AM.");
+        return;
+      }
       if (
         now.getHours() > CHECKIN_END.hour ||
         (now.getHours() === CHECKIN_END.hour &&
@@ -100,9 +112,17 @@ export function useAttendanceActions(setIsCheckedIn) {
     try {
       if (now.getHours() < CHECKOUT_MIN.hour) {
         const confirmEarly = await confirmAction(
-          `It's before 5:00 PM. Checking out early may affect your total work duration. Do you still want to proceed?`
+          `It's before 4:30 PM. Checking out early may affect your total work duration. Do you still want to proceed?`
         );
         if (!confirmEarly) return;
+      }
+      if (
+        now.getHours() > CHECKOUT_MAX.hour ||
+        (now.getHours() === CHECKOUT_MAX.hour &&
+          now.getMinutes() > CHECKOUT_MAX.minute)
+      ) {
+        showErrorToast(`Checkout is not allowed after 7:00 PM.`);
+        return;
       }
 
       const existingData = await getFromFirebase(

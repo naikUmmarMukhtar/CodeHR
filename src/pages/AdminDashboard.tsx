@@ -108,11 +108,13 @@ export default function AdminDashboard() {
         onReset={handleResetFilters}
         onLogout={handleLogout}
       />
-      <EmployeeList
-        filteredMembers={filteredMembers}
-        getStatusColor={getStatusColor}
-        summarize={summarize}
-      />
+      <div className="mb-20">
+        <EmployeeList
+          filteredMembers={filteredMembers}
+          getStatusColor={getStatusColor}
+          summarize={summarize}
+        />
+      </div>
     </div>
   );
 }

@@ -24,7 +24,7 @@ function App() {
   const isMobileDevice = useDeviceCheck();
 
   const navigate = useNavigate();
-  if (isMobileDevice) return <MobileOnlyPage />;
+  // if (isMobileDevice) return <MobileOnlyPage />;
   // if (isHoliday) return <HolidayPage />;
   if (loading) return <Loader />;
   // if (!user || !user.emailVerified) return <MobileAuthForm />;

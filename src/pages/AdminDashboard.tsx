@@ -4,10 +4,10 @@ import Loader from "../components/shared/Loader";
 import { useAdminData } from "../hooks/useAdminData";
 import { useEmployeesData } from "../hooks/useEmployeeData";
 import AdminHeader from "../components/AdminHeader";
-import EmployeeList from "../components/EmployeeList";
 import DashboardFilters from "../components/DashboardFilters";
 import { getAuth, signOut } from "firebase/auth";
 import { showErrorToast, showSuccessToast } from "../utils/toastMessage";
+import EmployeeList from "../components/EmployeeList";
 
 export default function AdminDashboard() {
   const { admin, loading: adminLoading, error: adminError } = useAdminData();
@@ -16,7 +16,6 @@ export default function AdminDashboard() {
     loading: teamLoading,
     error: teamError,
   } = useEmployeesData();
-  console.log(teamMembers, "teammembers in d");
 
   const [selectedUser, setSelectedUser] = useState("All");
   const [dateRange, setDateRange] = useState([
@@ -24,8 +23,10 @@ export default function AdminDashboard() {
   ]);
 
   if (adminLoading || teamLoading) return <Loader />;
-  if (adminError) return <p className="text-(--color-absent)">{adminError}</p>;
-  if (teamError) return <p className="text-(--color-absent)">{teamError}</p>;
+  if (adminError)
+    return <p className="text-[var(--color-absent)]">{adminError}</p>;
+  if (teamError)
+    return <p className="text-[var(--color-absent)]">{teamError}</p>;
   if (!admin) return <p>No admin data found.</p>;
 
   const allNames = [
@@ -38,6 +39,15 @@ export default function AdminDashboard() {
   const handleResetFilters = () => {
     setSelectedUser("All");
     setDateRange([{ startDate: null, endDate: null, key: "selection" }]);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await signOut(getAuth());
+      showSuccessToast("Logged out successfully.");
+    } catch {
+      showErrorToast("Logout failed. Please try again.");
+    }
   };
 
   const startDate = dateRange[0].startDate;
@@ -60,7 +70,7 @@ export default function AdminDashboard() {
       return { ...member, attendance: filteredAttendance };
     });
 
-  const summarize = (attendance = []) => {
+  const summarize = (attendance) => {
     const totals = {
       total: attendance.length,
       leave: 0,
@@ -79,25 +89,16 @@ export default function AdminDashboard() {
   const getStatusColor = (status) => {
     switch (String(status).toLowerCase()) {
       case "leave":
-        return "text-(--color-leave)";
+        return "text-[var(--color-leave)]";
       case "absent":
-        return "text-(--color-absent)";
+        return "text-[var(--color-absent)]";
       default:
-        return "text-(--color-primary)";
-    }
-  };
-
-  const handleLogout = async () => {
-    try {
-      await signOut(getAuth());
-      showSuccessToast("Logged out successfully.");
-    } catch {
-      showErrorToast("Logout failed. Please try again.");
+        return "text-[var(--color-primary)]";
     }
   };
 
   return (
-    <div className="min-h-screen bg-(--color-bg) text-(--color-text) px-4 py-4 sm:px-8 sm:py-6">
+    <div className="min-h-screen p-4 sm:p-6">
       <AdminHeader admin={admin} />
       <DashboardFilters
         selectedUser={selectedUser}
@@ -108,13 +109,11 @@ export default function AdminDashboard() {
         onReset={handleResetFilters}
         onLogout={handleLogout}
       />
-      <div className="mb-20">
-        <EmployeeList
-          filteredMembers={filteredMembers}
-          getStatusColor={getStatusColor}
-          summarize={summarize}
-        />
-      </div>
+      <EmployeeList
+        filteredMembers={filteredMembers}
+        getStatusColor={getStatusColor}
+        summarize={summarize}
+      />
     </div>
   );
 }

@@ -4,14 +4,14 @@ import { getAuth, signOut } from "firebase/auth";
 import { showErrorToast, showSuccessToast } from "../utils/toastMessage";
 
 export default function AdminHeader({ admin }) {
-  //   const handleLogout = async () => {
-  //     try {
-  //       await signOut(getAuth());
-  //       showSuccessToast("Logged out successfully.");
-  //     } catch {
-  //       showErrorToast("Logout failed. Please try again.");
-  //     }
-  //   };
+  const handleLogout = async () => {
+    try {
+      await signOut(getAuth());
+      showSuccessToast("Logged out successfully.");
+    } catch {
+      showErrorToast("Logout failed. Please try again.");
+    }
+  };
 
   return (
     <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-(--color-border) pb-3 mb-4">
@@ -25,12 +25,12 @@ export default function AdminHeader({ admin }) {
         </p>
       </div>
 
-      {/* <button
+      <button
         onClick={handleLogout}
         className="mt-3 sm:mt-0 flex items-center gap-2 text-sm px-3 py-2 border border-(--color-border) rounded-md hover:bg-(--color-bg-alt) transition"
       >
         <LogOut className="w-4 h-4 text-(--color-primary)" /> Logout
-      </button> */}
+      </button>
     </header>
   );
 }

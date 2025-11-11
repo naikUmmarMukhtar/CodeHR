@@ -18,6 +18,7 @@ import { useHolidayCheck } from "./hooks/useHolidayCheck";
 import { getFromFirebase } from "./api/firebaseAPI";
 import { useDeviceCheck } from "./hooks/useDeviceCheck";
 import MobileOnlyPage from "./pages/MobileOnlyPage";
+import EmployeeDetails from "./pages/EmployeeDetails";
 function App() {
   const isHoliday = useHolidayCheck();
   const { user, loading } = useAuth();
@@ -37,7 +38,7 @@ function App() {
         {user.isAdmin ? (
           <>
             <Route path="/" element={<AdminDashboard />} />
-            <Route path="/admin-dashboard" element={<AdminDashboard />} />
+            <Route path="/employee-details" element={<EmployeeDetails />} />
             <Route
               path="*"
               element={<Navigate to="/admin-dashboard" replace />}

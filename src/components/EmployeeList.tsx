@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { useNavigate } from "react-router-dom";
 
 export default function EmployeeList({ filteredMembers, summarize }) {

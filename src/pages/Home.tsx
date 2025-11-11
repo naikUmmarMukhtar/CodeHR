@@ -33,7 +33,7 @@ export default function Home() {
   const navigate = useNavigate();
   const uid = auth.currentUser?.uid;
   const { locationAllowed, permissionState, retryLocationCheck } =
-    +useLocationPermission();
+    useLocationPermission();
 
   useEffect(() => {
     const fetchEmployeeDetails = async () => {

@@ -124,7 +124,7 @@ export const useLocationPermission = () => {
     run();
 
     // periodic re-check (short interval for Safari issues, otherwise moderate)
-    const interval = setInterval(run, isSafari ? 1000 : 1000);
+    const interval = setInterval(run, isSafari ? 5000 : 6000);
     return () => {
       mounted = false;
       clearInterval(interval);

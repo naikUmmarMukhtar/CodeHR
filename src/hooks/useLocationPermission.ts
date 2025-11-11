@@ -1,160 +1,141 @@
-// import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
-// export const useLocationPermission = () => {
-//   const [locationAllowed, setLocationAllowed] = useState<boolean | null>(null);
+type PermissionStateType = "granted" | "prompt" | "denied" | "unsupported";
 
-//   const requestLocation = () => {
-//     if (!navigator.geolocation) {
-//       console.warn("Geolocation is not supported by this browser.");
-//       setLocationAllowed(false);
-//       return;
-//     }
+const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
 
-//     navigator.geolocation.getCurrentPosition(
-//       () => setLocationAllowed(true),
-//       (error) => {
-//         if (error.code === error.PERMISSION_DENIED) {
-//           setLocationAllowed(false);
-//         } else {
-//           console.error("Geolocation error:", error);
-//           setLocationAllowed(false);
-//         }
-//       }
-//     );
-//   };
-
-//   useEffect(() => {
-//     let intervalId: number;
-
-//     const checkPermission = async () => {
-//       if (navigator.permissions) {
-//         try {
-//           const result = await navigator.permissions.query({
-//             name: "geolocation",
-//           });
-
-//           if (result.state === "granted") setLocationAllowed(true);
-//           else if (result.state === "denied") setLocationAllowed(false);
-//           else setLocationAllowed(null);
-//         } catch (err) {
-//           console.warn("Permission check failed:", err);
-//           requestLocation();
-//         }
-//       } else {
-//         requestLocation();
-//       }
-//     };
-
-//     checkPermission();
-
-//     intervalId = window.setInterval(() => {
-//       checkPermission();
-//     }, 1000);
-
-//     return () => clearInterval(intervalId);
-//   }, []);
-
-//   return { locationAllowed, retryLocationCheck: requestLocation };
-// };
-
-import { useEffect, useState, useCallback } from "react";
+const getCurrentPositionAsync = (options?: PositionOptions) =>
+  new Promise<GeolocationPosition>((resolve, reject) =>
+    navigator.geolocation.getCurrentPosition(resolve, reject, options)
+  );
 
 export const useLocationPermission = () => {
   const [locationAllowed, setLocationAllowed] = useState<boolean | null>(null);
-  const [lastCheckTime, setLastCheckTime] = useState(0);
-  const [retryCount, setRetryCount] = useState(0);
+  const [permissionState, setPermissionState] =
+    useState<PermissionStateType>("unsupported");
+  const lastCheckRef = useRef<number>(0);
+  const retryRef = useRef(0);
 
-  const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+  const throttle = (ms = 1000) => {
+    const now = Date.now();
+    if (now - lastCheckRef.current < ms) return false;
+    lastCheckRef.current = now;
+    return true;
+  };
 
-  const checkDeviceLocationServices =
-    useCallback(async (): Promise<boolean> => {
-      const now = Date.now();
-      if (now - lastCheckTime < 1000) {
-        return locationAllowed ?? false;
+  const evaluateWithGetPosition = useCallback(
+    async (promptIfNeeded = false) => {
+      if (!navigator.geolocation) {
+        setLocationAllowed(false);
+        setPermissionState("unsupported");
+        return false;
       }
-      setLastCheckTime(now);
-
-      return new Promise((resolve) => {
-        const successHandler = () => {
-          setLocationAllowed(true);
-          setRetryCount(0);
-          resolve(true);
-        };
-
-        const errorHandler = (error: GeolocationPositionError) => {
-          console.error("Location check failed:", error);
-
-          if (isSafari && retryCount < 3) {
-            setRetryCount((prev) => prev + 1);
-            setTimeout(() => {
-              navigator.geolocation.getCurrentPosition(
-                successHandler,
-                errorHandler,
-                {
-                  enableHighAccuracy: true,
-                  timeout: 10000,
-                  maximumAge: 0,
-                }
-              );
-            }, 1000);
-            return;
-          }
-
-          setLocationAllowed(false);
-          resolve(false);
-        };
-
-        navigator.geolocation.getCurrentPosition(successHandler, errorHandler, {
-          enableHighAccuracy: true,
-          timeout: isSafari ? 10000 : 5000,
-          maximumAge: 0,
-        });
-      });
-    }, [locationAllowed, lastCheckTime, retryCount, isSafari]);
-
-  const requestLocation = useCallback(async () => {
-    if (!navigator.geolocation) {
-      console.warn("Geolocation is not supported by this browser.");
-      setLocationAllowed(false);
-      return;
-    }
-
-    setRetryCount(0);
-    await checkDeviceLocationServices();
-  }, [checkDeviceLocationServices]);
-
-  useEffect(() => {
-    let isSubscribed = true;
-
-    const checkPermission = async () => {
-      if (!isSubscribed) return;
 
       try {
-        const result = await checkDeviceLocationServices();
-        if (!isSubscribed) return;
-
-        if (result) {
-          setLocationAllowed(true);
+        // try to get a quick position. This will prompt if permission is "prompt".
+        await getCurrentPositionAsync({
+          enableHighAccuracy: true,
+          timeout: 7000,
+          maximumAge: 0,
+        });
+        setLocationAllowed(true);
+        setPermissionState("granted");
+        retryRef.current = 0;
+        return true;
+      } catch (err: any) {
+        // err.code === 1 => PERMISSION_DENIED
+        // err.code === 2 => POSITION_UNAVAILABLE
+        // err.code === 3 => TIMEOUT
+        if (err?.code === 1) {
+          setLocationAllowed(false);
+          setPermissionState("denied");
+        } else {
+          // POSITION_UNAVAILABLE or TIMEOUT -> probably system or GPS off or poor signal
+          // For Safari we can retry a few times (sometimes iOS needs retries).
+          if (isSafari && retryRef.current < 3) {
+            retryRef.current++;
+            await new Promise((r) => setTimeout(r, 1000));
+            return evaluateWithGetPosition(promptIfNeeded);
+          }
+          setLocationAllowed(false);
+          setPermissionState("prompt"); // treat as prompt/unavailable
         }
-      } catch (err) {
-        if (!isSubscribed) return;
-        console.warn("Permission check failed:", err);
+        return false;
+      }
+    },
+    []
+  );
+
+  const checkPermission = useCallback(async () => {
+    if (!throttle()) return locationAllowed ?? false;
+
+    if (!navigator.geolocation) {
+      setLocationAllowed(false);
+      setPermissionState("unsupported");
+      return false;
+    }
+
+    if (navigator.permissions && (navigator.permissions as any).query) {
+      try {
+        const p = await (navigator.permissions as any).query({
+          name: "geolocation",
+        });
+        // p.state is "granted" | "prompt" | "denied"
+        setPermissionState(p.state);
+        if (p.state === "granted") {
+          setLocationAllowed(true);
+          retryRef.current = 0;
+          return true;
+        } else if (p.state === "prompt") {
+          // don't assume true; try to get a position (may prompt)
+          return evaluateWithGetPosition(true);
+        } else {
+          // denied
+          setLocationAllowed(false);
+          return false;
+        }
+      } catch (e) {
+        // Permissions API failed - fallback to attempting getCurrentPosition
+        return evaluateWithGetPosition();
+      }
+    } else {
+      // Permissions API unsupported (older Safari) -> attempt getCurrentPosition
+      return evaluateWithGetPosition();
+    }
+  }, [evaluateWithGetPosition, locationAllowed]);
+
+  const requestLocation = useCallback(async () => {
+    // explicit user-triggered request: try to prompt/get position
+    retryRef.current = 0;
+    return checkPermission();
+  }, [checkPermission]);
+
+  useEffect(() => {
+    let mounted = true;
+    const run = async () => {
+      if (!mounted) return;
+      try {
+        await checkPermission();
+      } catch {
+        if (!mounted) return;
         setLocationAllowed(false);
       }
     };
+    run();
 
-    checkPermission();
-
-    const intervalId = setInterval(checkPermission, isSafari ? 5000 : 2000);
-
+    // periodic re-check (short interval for Safari issues, otherwise moderate)
+    const interval = setInterval(run, isSafari ? 1000 : 1000);
     return () => {
-      isSubscribed = false;
-      clearInterval(intervalId);
+      mounted = false;
+      clearInterval(interval);
     };
-  }, [checkDeviceLocationServices, isSafari]);
+  }, [checkPermission]);
 
   return {
     locationAllowed,
+    permissionState,
     retryLocationCheck: requestLocation,
   };
 };
+
+export default useLocationPermission;

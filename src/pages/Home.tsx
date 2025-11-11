@@ -23,7 +23,7 @@ import ColorLegend from "../components/ColorLegend";
 export default function Home() {
   const [employeeName, setEmployeeName] = useState<string | null>(null);
   const [workTimeDuration, setWorkTimeDuration] = useState<string | null>(null);
-  const [isCheckedIn, setIsCheckedIn] = useState(false); // ✅ default false
+  const [isCheckedIn, setIsCheckedIn] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [isDayCompleted, setIsDayCompleted] = useState(false);
 
@@ -32,7 +32,8 @@ export default function Home() {
     useAttendanceActions(setIsCheckedIn);
   const navigate = useNavigate();
   const uid = auth.currentUser?.uid;
-  const { locationAllowed, retryLocationCheck } = useLocationPermission();
+  const { locationAllowed, permissionState, retryLocationCheck } =
+    +useLocationPermission();
 
   useEffect(() => {
     const fetchEmployeeDetails = async () => {
@@ -81,15 +82,27 @@ export default function Home() {
     : "var(--color-absent)";
 
   const recordPunch = async (todayStatus, setIsLoading, fetchTodayStatus) => {
-    if (!locationAllowed) {
-      showErrorToast("Please turn on location.");
+    if (locationAllowed === null) {
+      showErrorToast("Checking location — please wait a moment.");
       retryLocationCheck();
       return;
     }
-    // if (!isInside) {
-    //   showErrorToast("You are outside the office area.");
-    //   return;
-    // }
+
+    if (!locationAllowed) {
+      if (permissionState === "denied") {
+        showErrorToast(
+          "Location permission denied. Enable site location in your browser settings."
+        );
+      } else {
+        showErrorToast("Please turn on device location services.");
+      }
+      retryLocationCheck();
+      return;
+    }
+    if (!isInside) {
+      showErrorToast("You are outside the office area.");
+      return;
+    }
     setIsLoading(true);
     try {
       if (todayStatus === "Check-in") {

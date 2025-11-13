@@ -16,7 +16,7 @@ export default function AttendanceCalendar() {
         const uid = auth.currentUser?.uid;
         if (!uid) return;
 
-        const data = await getFromFirebase(`${uid}/attendance`);
+        const data = await getFromFirebase(`/teammembers/${uid}/attendance`);
         console.log(data, "data....");
 
         setAttendanceData(data || {});
@@ -33,6 +33,9 @@ export default function AttendanceCalendar() {
   // 🧩 Map all statuses by date
   const statusByDate = {};
   Object.entries(attendanceData || {}).forEach(([date, record]) => {
+    console.log(date, "date");
+    console.log(record, "record");
+
     const key = Object.keys(record || {})[0];
     const actualRecord =
       record?.checkIn || record?.status ? record : record[key];
